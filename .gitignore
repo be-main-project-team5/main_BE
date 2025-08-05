@@ -141,4 +141,7 @@ media
 .uv_cache/
 *.lock
 
+### idea ###
+.idea/
+
 # End of .gitignore
