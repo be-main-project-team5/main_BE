@@ -144,4 +144,10 @@ media
 ### idea ###
 .idea/
 
+# Project-specific ignores
+.env
+.venv/
+.ruff_cache/
+.gitmessage.txt
+
 # End of .gitignore
