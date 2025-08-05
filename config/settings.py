@@ -45,11 +45,11 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "drf_spectacular",
     "apps.users",
+    "apps.groups",
     "apps.idols",
     "apps.chats",
     "apps.bookmarks",
     "apps.alarms",
-    "apps.groups",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
