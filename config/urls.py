@@ -16,8 +16,11 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 
 urlpatterns = [
+    # Django admin 사이트 URL
     path("admin/", admin.site.urls),
+    # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
+    path('api/v1/', include('apps.groups.urls')),
 ]
