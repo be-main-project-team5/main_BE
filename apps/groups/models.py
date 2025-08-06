@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # ERD의 'groups' 테이블에 해당하는 Django 모델입니다.
 # 이 모델은 아이돌 그룹의 핵심 정보를 정의하며, 데이터베이스 테이블과 직접적으로 매핑됩니다.
 # 각 필드는 테이블의 컬럼을 나타내며, 데이터 유형과 제약 조건이 설정되어 있습니다.
@@ -19,7 +20,9 @@ class Group(models.Model):
 
     # 그룹 로고 이미지의 URL 주소입니다.
     # URLField는 URL 형식을 검증하며, blank=True와 null=True는 이 필드가 비어있어도 됨을 의미합니다.
-    logo_image_url = models.URLField(max_length=2083, blank=True, null=True, help_text="로고 이미지 URL")
+    logo_image_url = models.URLField(
+        max_length=2083, blank=True, null=True, help_text="로고 이미지 URL"
+    )
 
     # 레코드가 처음 생성된 날짜와 시간입니다.
     # auto_now_add=True는 객체가 처음 생성될 때 현재 시간으로 자동 설정되도록 합니다.

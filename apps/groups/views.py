@@ -1,7 +1,9 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny # AllowAny를 임포트합니다.
+from rest_framework.permissions import AllowAny  # AllowAny를 임포트합니다.
+
 from .models import Group
 from .serializers import GroupSerializer
+
 
 # Django REST Framework의 ViewSet을 사용하여 Group 모델에 대한 API 엔드포인트를 제공합니다.
 # ModelViewSet을 상속받아 기본적인 CRUD(Create, Retrieve, Update, Delete) 작업을 위한

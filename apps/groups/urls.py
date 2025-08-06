@@ -1,5 +1,6 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import GroupViewSet
 
 # 이 파일은 'groups' 애플리케이션의 URL 라우팅을 정의합니다.
@@ -19,12 +20,12 @@ router = DefaultRouter()
 # - PATCH /groups/{id}/: 특정 ID의 그룹 부분 업데이트
 # - DELETE /groups/{id}/: 특정 ID의 그룹 삭제
 # GroupViewSet은 'apps/groups/views.py'에 정의되어 있습니다.
-router.register(r'groups', GroupViewSet)
+router.register(r"groups", GroupViewSet)
 
 # 'groups' 애플리케이션의 URL 패턴을 정의합니다.
 # path('', include(router.urls))는 DefaultRouter가 생성한 모든 URL 패턴을 이 애플리케이션의 루트 경로에 포함시킵니다.
 # 예를 들어, 'config/urls.py'에서 path('api/v1/', include('apps.groups.urls'))로 설정되어 있다면,
 # 최종적으로 /api/v1/groups/ 와 같은 형태로 접근할 수 있게 됩니다.
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]
