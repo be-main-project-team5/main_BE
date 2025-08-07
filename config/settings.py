@@ -210,7 +210,7 @@ SIMPLE_JWT = {
 # Refresh Token Cookie Settings
 REFRESH_TOKEN_COOKIE_SECURE = False  # 개발 환경에서는 False, HTTPS 환경에서는 True
 REFRESH_TOKEN_COOKIE_HTTPONLY = True
-REFRESH_TOKEN_COOKIE_SAMESITE = 'Lax'
+REFRESH_TOKEN_COOKIE_SAMESITE = "Lax"
 
 # drf-spectacular 설정 (API 문서화를 위한 설정)
 SPECTACULAR_SETTINGS = {

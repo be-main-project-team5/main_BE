@@ -5,19 +5,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_remove_customuser_profile_image_and_more'),
+        ("users", "0002_remove_customuser_profile_image_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='customuser',
-            name='profile_picture',
+            model_name="customuser",
+            name="profile_picture",
         ),
         migrations.AddField(
-            model_name='customuser',
-            name='profile_image',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='user_profiles', to='users.image'),
+            model_name="customuser",
+            name="profile_image",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="user_profiles",
+                to="users.image",
+            ),
         ),
     ]

@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0003_remove_customuser_profile_picture_and_more'),
+        ("users", "0003_remove_customuser_profile_picture_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='image',
-            name='image_file',
-            field=models.ImageField(blank=True, null=True, upload_to='images/'),
+            model_name="image",
+            name="image_file",
+            field=models.ImageField(blank=True, null=True, upload_to="images/"),
         ),
         migrations.AlterField(
-            model_name='image',
-            name='file_size',
+            model_name="image",
+            name="file_size",
             field=models.IntegerField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='image',
-            name='url',
+            model_name="image",
+            name="url",
             field=models.CharField(blank=True, max_length=2048, null=True),
         ),
     ]

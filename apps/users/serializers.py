@@ -1,9 +1,9 @@
-import os
+
 from django.conf import settings
-from django.core.files.storage import default_storage
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.storage import default_storage
 from rest_framework import serializers
 
 from .models import CustomUser, Image  # Uesrschedule
@@ -106,7 +106,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(
         required=False, allow_null=True, write_only=True
     )
-    profile_image_url = serializers.SerializerMethodField() # 읽기 전용 필드 추가
+    profile_image_url = serializers.SerializerMethodField()  # 읽기 전용 필드 추가
 
     class Meta:
         model = CustomUser
@@ -158,8 +158,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
             # 기존 이미지 삭제
             if instance.profile_image:
                 # 파일 시스템에서 이미지 파일 삭제
-                if default_storage.exists(instance.profile_image.url.replace(settings.MEDIA_URL, '')):
-                    default_storage.delete(instance.profile_image.url.replace(settings.MEDIA_URL, ''))
+                if default_storage.exists(
+                    instance.profile_image.url.replace(settings.MEDIA_URL, "")
+                ):
+                    default_storage.delete(
+                        instance.profile_image.url.replace(settings.MEDIA_URL, "")
+                    )
                 instance.profile_image.delete()  # Image 모델 인스턴스 삭제
 
             if profile_image_file:  # 새 이미지가 있는 경우
@@ -168,11 +172,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
                 instance.profile_image = new_image
             else:  # 이미지를 null로 설정 (삭제 요청)
                 instance.profile_image = None
-        elif "profile_image" in self.context['request'].data and self.context['request'].data['profile_image'] == 'null':
+        elif (
+            "profile_image" in self.context["request"].data
+            and self.context["request"].data["profile_image"] == "null"
+        ):
             # 클라이언트에서 명시적으로 "profile_image": null을 보낸 경우 (이미지 삭제)
             if instance.profile_image:
-                if default_storage.exists(instance.profile_image.url.replace(settings.MEDIA_URL, '')):
-                    default_storage.delete(instance.profile_image.url.replace(settings.MEDIA_URL, ''))
+                if default_storage.exists(
+                    instance.profile_image.url.replace(settings.MEDIA_URL, "")
+                ):
+                    default_storage.delete(
+                        instance.profile_image.url.replace(settings.MEDIA_URL, "")
+                    )
                 instance.profile_image.delete()
             instance.profile_image = None
 

@@ -1,14 +1,15 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.db import models
-from django.conf import settings
-from django.core.files.storage import default_storage
 import os
+
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.files.storage import default_storage
+from django.db import models
 
 
 # Image 모델 정의 (프로필 이미지, 로고 이미지 등에 사용) / 나중에 common 앱으로 이동할 수 있다.
 class Image(models.Model):
     # 실제 이미지 파일을 저장합니다.
-    image_file = models.ImageField(upload_to='images/', null=True, blank=True)
+    image_file = models.ImageField(upload_to="images/", null=True, blank=True)
     # 이미지 URL을 저장합니다. (image_file에서 자동 생성)
     url = models.CharField(max_length=2048, null=True, blank=True)
     # 파일 크기 (바이트 단위)를 저장합니다. (image_file에서 자동 생성)
@@ -28,7 +29,9 @@ class Image(models.Model):
             # 파일이 저장될 경로를 설정합니다.
             # default_storage.save는 파일 시스템에 파일을 저장하고 저장된 파일의 상대 경로를 반환합니다.
             # 이 경로를 MEDIA_URL과 결합하여 완전한 URL을 만듭니다.
-            file_name = default_storage.save(os.path.join('images', self.image_file.name), self.image_file)
+            file_name = default_storage.save(
+                os.path.join("images", self.image_file.name), self.image_file
+            )
             self.url = settings.MEDIA_URL + file_name
             self.file_size = self.image_file.size
         super().save(*args, **kwargs)
@@ -36,7 +39,9 @@ class Image(models.Model):
     def delete(self, *args, **kwargs):
         # 모델 인스턴스가 삭제될 때 연결된 파일도 삭제합니다.
         if self.image_file:
-            self.image_file.delete(save=False) # save=False는 모델의 save 메서드를 다시 호출하지 않도록 합니다.
+            self.image_file.delete(
+                save=False
+            )  # save=False는 모델의 save 메서드를 다시 호출하지 않도록 합니다.
         super().delete(*args, **kwargs)
 
     def __str__(self):

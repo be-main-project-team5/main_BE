@@ -1,13 +1,13 @@
+from django.conf import settings
 from django.db import transaction
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
-from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from .serializers import (
@@ -33,10 +33,12 @@ class UserSignupView(generics.CreateAPIView):
     serializer_class = UserSignupSerializer
     # 누구나 접근 가능
     permission_classes = (AllowAny,)
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )
 
     def create(self, request, *args, **kwargs):
-
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -160,7 +162,10 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]  # 로그인한 사용자만 접근 가능
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )
 
     def get_object(self):
         # 현재 로그인한 사용자 객체를 반환
