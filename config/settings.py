@@ -16,12 +16,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-<<<<<<< HEAD
-load_dotenv()
 
-
-=======
->>>>>>> feature/groups
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -68,19 +63,6 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
 
-<<<<<<< HEAD
-=======
-REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # 기본적으로 인증된 사용자만 접근 허용
-    ),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",  # 기본적으로 JWT Token이 있는지 검증
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
-}
->>>>>>> feature/groups
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
