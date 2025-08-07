@@ -23,11 +23,11 @@ from django.urls import include, path
 urlpatterns = [
     # Django admin 사이트 URL
     path("admin/", admin.site.urls),
-<<<<<<< HEAD
     path("api/v1/users/", include("apps.users.urls")),
+# /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
+    path("api/v1/groups", include("apps.groups.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-=======
-    # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
-    path("api/v1/", include("apps.groups.urls")),
-]
->>>>>>> feature/groups
+
+
+
+
