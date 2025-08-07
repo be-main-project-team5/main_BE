@@ -5,20 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0002_alter_group_agency_alter_group_created_at_and_more'),
-        ('users', '0004_image_image_file_alter_image_file_size_and_more'),
+        ("groups", "0002_alter_group_agency_alter_group_created_at_and_more"),
+        ("users", "0004_image_image_file_alter_image_file_size_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='group',
-            name='logo_image_url',
+            model_name="group",
+            name="logo_image_url",
         ),
         migrations.AddField(
-            model_name='group',
-            name='logo_image',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='group_logos', to='users.image'),
+            model_name="group",
+            name="logo_image",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="group_logos",
+                to="users.image",
+            ),
         ),
     ]

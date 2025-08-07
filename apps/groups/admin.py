@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils.html import format_html
 
 from apps.users.models import Image  # Image 모델 임포트
+
 from .models import Group
 
 
@@ -41,7 +42,14 @@ class GroupAdminForm(forms.ModelForm):
 @admin.register(Group)
 class GroupAdmin(admin.ModelAdmin):
     form = GroupAdminForm  # Use the custom form
-    list_display = ("name", "debut_date", "agency", "get_logo_image_url", "created_at", "updated_at")
+    list_display = (
+        "name",
+        "debut_date",
+        "agency",
+        "get_logo_image_url",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("agency",)
     search_fields = ("name", "agency")
     exclude = ("logo_image",)  # Hide the ForeignKey field
@@ -52,6 +60,9 @@ class GroupAdmin(admin.ModelAdmin):
 
     def get_logo_image_url(self, obj):
         if obj.logo_image and obj.logo_image.url:
-            return format_html('<img src="{}" width="50" height="50" />', obj.logo_image.url)
+            return format_html(
+                '<img src="{}" width="50" height="50" />', obj.logo_image.url
+            )
         return ""
+
     get_logo_image_url.short_description = "로고 이미지"

@@ -3,6 +3,7 @@ from django.core.files.storage import default_storage
 from rest_framework import serializers
 
 from apps.users.models import Image  # Image 모델 임포트
+
 from .models import Group
 
 
@@ -18,7 +19,9 @@ class ImageSerializer(serializers.ModelSerializer):
 # 이 시리얼라이저는 Django REST Framework의 ModelSerializer를 상속받아, 모델 필드에 대한 자동 매핑 기능을 활용합니다.
 # 'apps/groups/views.py'의 GroupViewSet에서 Group 모델의 데이터를 직렬화하고 역직렬화하는 데 사용됩니다.
 class GroupSerializer(serializers.ModelSerializer):
-    logo_image = serializers.ImageField(required=False, allow_null=True, write_only=True)
+    logo_image = serializers.ImageField(
+        required=False, allow_null=True, write_only=True
+    )
     logo_image_url = serializers.SerializerMethodField()  # 읽기 전용 필드 추가
 
     class Meta:

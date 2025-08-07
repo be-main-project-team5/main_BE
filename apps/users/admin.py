@@ -17,12 +17,12 @@ class CustomUserAdminForm(forms.ModelForm):
         fields = (
             "email",
             "nickname",
-            "password", # For creating/changing password
+            "password",  # For creating/changing password
             "role",
             "is_active",
             "is_staff",
             "is_superuser",
-            "profile_image_upload", # Custom field for image upload
+            "profile_image_upload",  # Custom field for image upload
         )
 
     def __init__(self, *args, **kwargs):
@@ -38,7 +38,6 @@ class CustomUserAdminForm(forms.ModelForm):
         user = super().save(
             commit=False
         )  # Save the user instance without committing yet
-
 
         with transaction.atomic():
             # Handle profile image update/creation
@@ -66,7 +65,14 @@ class CustomUserAdminForm(forms.ModelForm):
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserAdminForm  # Use the custom form
-    list_display = ("email", "nickname", "role", "get_profile_image_url", "created_at", "updated_at")
+    list_display = (
+        "email",
+        "nickname",
+        "role",
+        "get_profile_image_url",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("role",)
     search_fields = ("email", "nickname")
     # Exclude the original profile_image ForeignKey field from the form
@@ -74,12 +80,21 @@ class CustomUserAdmin(admin.ModelAdmin):
     exclude = ("profile_image",)  # This will hide the ForeignKey dropdown
 
     # readonly_fields: 관리자 페이지에서 수정할 수 없는 필드를 지정합니다.
-    readonly_fields = ("get_profile_image_url", "created_at", "updated_at", "date_joined", "last_login")
+    readonly_fields = (
+        "get_profile_image_url",
+        "created_at",
+        "updated_at",
+        "date_joined",
+        "last_login",
+    )
 
     def get_profile_image_url(self, obj):
         if obj.profile_image and obj.profile_image.url:
-            return format_html('<img src="{}" width="50" height="50" />', obj.profile_image.url)
+            return format_html(
+                '<img src="{}" width="50" height="50" />', obj.profile_image.url
+            )
         return ""
+
     get_profile_image_url.short_description = "프로필 이미지"
 
 
