@@ -11,7 +11,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +32,7 @@ SECRET_KEY = "django-insecure-zqrt42uj(ogrd2i+=yj2+@fk=0c!26_f)tzao1hy4ap-1#dt)*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  # 배포 시 여기에 도메인 주소 추가.
 
 
 # Application definition
@@ -43,6 +49,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "apps.users",
     "apps.groups",
@@ -54,15 +61,6 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
 
-REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",  # 기본적으로 인증된 사용자만 접근 허용
-    ),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",  # 기본적으로 JWT Token이 있는지 검증
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -116,12 +114,9 @@ DATABASES = {
 #     }
 # }
 
-SPECTACULAR_SETTINGS = {
-    "COMPONENT_SPLIT_REQUEST": True,
-}
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -129,6 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 8,  # 최소 비밀번호 길이
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -142,9 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ko-kr"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
@@ -156,7 +154,70 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# Media files (User-uploaded content)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "users.CustomUser"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # 선택 사항: 세션 인증도 필요하다면
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",  # 기본적으로 인증된 사용자만 접근 허용
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,  # 페이지네이션 기본 크기
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # 액세스 토큰 유효 기간
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 리프레시 토큰 유효 기간
+    "ROTATE_REFRESH_TOKENS": True,  # 리프레시 토큰 재사용 시 새 토큰 발급
+    "BLACKLIST_AFTER_ROTATION": True,  # 사용된 리프레시 토큰 블랙리스트 처리
+    "UPDATE_LAST_LOGIN": False,  # 마지막 로그인 시간 업데이트 여부 (기본값 False 유지)
+    "ALGORITHM": "HS256",  # 서명 알고리즘
+    "SIGNING_KEY": SECRET_KEY,  # 토큰 서명에 사용될 키 (SECRET_KEY와 동일)
+    "VERIFYING_KEY": None,  # 토큰 검증에 사용될 키 (SIGNING_KEY와 동일하면 None)
+    "AUDIENCE": None,  # 토큰 수신자
+    "ISSUER": None,  # 토큰 발급자
+    "JWK_URL": None,  # JWK (JSON Web Key) URL
+    "LEEWAY": 0,  # 시간 오차 허용 범위
+    "AUTH_HEADER_TYPES": (
+        "Bearer",
+    ),  # 인증 헤더 타입 (예: Authorization: Bearer <token>)
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",  # 인증 헤더 이름
+    "USER_ID_FIELD": "id",  # 사용자 모델에서 사용자 ID로 사용할 필드
+    "USER_ID_CLAIM": "user_id",  # JWT 페이로드에서 사용자 ID 클레임 이름
+    "USER_AUTHENTICATION_RULE": "rest_framework_simplejwt.authentication.default_user_authentication_rule",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",  # 토큰 타입 클레임 이름
+    "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
+    "JTI_CLAIM": "jti",  # JWT ID 클레임 이름
+    "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+}
+
+# Refresh Token Cookie Settings
+REFRESH_TOKEN_COOKIE_SECURE = False  # 개발 환경에서는 False, HTTPS 환경에서는 True
+REFRESH_TOKEN_COOKIE_HTTPONLY = True
+REFRESH_TOKEN_COOKIE_SAMESITE = 'Lax'
+
+# drf-spectacular 설정 (API 문서화를 위한 설정)
+SPECTACULAR_SETTINGS = {
+    "TITLE": "DingDing API",  # API 문서의 제목
+    "DESCRIPTION": "DingDing Service API Documentation",  # API 문서 설명
+    "VERSION": "1.0.0",  # API 버전
+    "SERVE_INCLUDE_SCHEMA": False,  # 스키마를 API 엔드포인트로 제공할지 여부
+    "COMPONENT_SPLIT_REQUEST": True,  # 컴포넌트를 별도의 요청으로 분할하여 로딩 속도 개선
+    # 기타 필요한 설정 추가 가능
+}
