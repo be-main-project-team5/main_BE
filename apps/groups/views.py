@@ -24,3 +24,31 @@ class GroupViewSet(viewsets.ModelViewSet):
     # AllowAny는 어떤 사용자든(인증되지 않은 사용자 포함) 이 API에 접근할 수 있도록 허용합니다.
     # 이는 개발 및 테스트 목적으로 임시로 설정하는 것이며, 실제 서비스에서는 적절한 인증 및 권한 설정이 필요합니다.
     permission_classes = [AllowAny]
+
+
+from rest_framework.generics import get_object_or_404
+from .models import GroupSchedule
+from .serializers import GroupScheduleSerializer
+
+class GroupScheduleViewSet(viewsets.ModelViewSet):
+    """
+    특정 그룹에 속한 스케줄을 관리하는 ViewSet
+    """
+    queryset = GroupSchedule.objects.all()
+    serializer_class = GroupScheduleSerializer
+    permission_classes = [AllowAny] # 임시로 모든 접근 허용
+
+    def get_queryset(self):
+        """
+        URL에서 group_pk를 받아 해당 그룹의 스케줄만 필터링하여 반환합니다.
+        """
+        group_pk = self.kwargs.get("group_pk")
+        return self.queryset.filter(group_id=group_pk)
+
+    def perform_create(self, serializer):
+        """
+        스케줄 생성 시, URL의 group_pk를 사용하여 group 필드를 자동으로 설정합니다.
+        """
+        group_pk = self.kwargs.get("group_pk")
+        group = get_object_or_404(Group, pk=group_pk)
+        serializer.save(group=group)

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from apps.users.models import Image  # Image 모델 임포트
 
-from .models import Group
+from .models import Group, GroupSchedule
 
 
 # Image 모델을 위한 Serializer (users 앱에서 가져옴)
@@ -98,3 +98,24 @@ class GroupSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class GroupScheduleSerializer(serializers.ModelSerializer):
+    """
+    GroupSchedule 모델을 위한 시리얼라이저
+    """
+    class Meta:
+        model = GroupSchedule
+        fields = [
+            'id',
+            'group',
+            'start_time',
+            'end_time',
+            'location',
+            'description',
+            'is_public',
+            'created_at',
+            'updated_at',
+        ]
+        # group 필드는 URL에서 자동으로 주입되므로, 생성/수정 시에는 읽기 전용으로 처리합니다.
+        read_only_fields = ('group',)
