@@ -27,16 +27,19 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 from rest_framework.generics import get_object_or_404
+
 from .models import GroupSchedule
 from .serializers import GroupScheduleSerializer
+
 
 class GroupScheduleViewSet(viewsets.ModelViewSet):
     """
     특정 그룹에 속한 스케줄을 관리하는 ViewSet
     """
+
     queryset = GroupSchedule.objects.all()
     serializer_class = GroupScheduleSerializer
-    permission_classes = [AllowAny] # 임시로 모든 접근 허용
+    permission_classes = [AllowAny]  # 임시로 모든 접근 허용
 
     def get_queryset(self):
         """

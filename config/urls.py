@@ -24,7 +24,7 @@ urlpatterns = [
     # Django admin 사이트 URL
     path("admin/", admin.site.urls),
     path("api/v1/users/", include("apps.users.urls")),
-# /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
+    # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/idols/", include("apps.idols.urls")),
     # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/groups/", include("apps.groups.urls")),

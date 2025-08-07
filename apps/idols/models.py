@@ -4,8 +4,12 @@ from apps.users.models import CustomUser
 
 
 class Idol(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)     # 유저와 1대1이므로 원투원 필드 사용
-    group = models.ForeignKey('groups.Group', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.OneToOneField(
+        CustomUser, on_delete=models.CASCADE
+    )  # 유저와 1대1이므로 원투원 필드 사용
+    group = models.ForeignKey(
+        "groups.Group", on_delete=models.SET_NULL, null=True, blank=True
+    )
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -13,26 +17,30 @@ class Idol(models.Model):
     def __str__(self):
         return self.name
 
+
 class IdolManager(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     idol = models.ForeignKey(Idol, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('user', 'idol')  # 같은 매니저가 같은 아이돌에 중복 등록되지 않도록
+        unique_together = (
+            "user",
+            "idol",
+        )  # 같은 매니저가 같은 아이돌에 중복 등록되지 않도록
 
     def __str__(self):
         return f"{self.user.nickname} → {self.idol.name}"
 
 
 class IdolSchedule(models.Model):
-    idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name='schedules')
+    idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="schedules")
     manager = models.ForeignKey(  # 작성자
         CustomUser,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='written_schedules',
-        help_text='이 스케줄을 작성한 아이돌 매니저'
+        related_name="written_schedules",
+        help_text="이 스케줄을 작성한 아이돌 매니저",
     )
     title = models.CharField(max_length=100)
     start_time = models.DateTimeField()

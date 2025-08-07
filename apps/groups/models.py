@@ -52,11 +52,12 @@ class GroupSchedule(models.Model):
     """
     그룹 스케줄 모델
     """
+
     group = models.ForeignKey(
         Group,
         on_delete=models.CASCADE,
-        related_name='schedules',
-        help_text="스케줄이 속한 그룹"
+        related_name="schedules",
+        help_text="스케줄이 속한 그룹",
     )
     start_time = models.DateTimeField(help_text="시작 시간")
     end_time = models.DateTimeField(help_text="종료 시간")

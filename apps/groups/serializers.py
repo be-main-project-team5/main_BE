@@ -104,18 +104,19 @@ class GroupScheduleSerializer(serializers.ModelSerializer):
     """
     GroupSchedule 모델을 위한 시리얼라이저
     """
+
     class Meta:
         model = GroupSchedule
         fields = [
-            'id',
-            'group',
-            'start_time',
-            'end_time',
-            'location',
-            'description',
-            'is_public',
-            'created_at',
-            'updated_at',
+            "id",
+            "group",
+            "start_time",
+            "end_time",
+            "location",
+            "description",
+            "is_public",
+            "created_at",
+            "updated_at",
         ]
         # group 필드는 URL에서 자동으로 주입되므로, 생성/수정 시에는 읽기 전용으로 처리합니다.
-        read_only_fields = ('group',)
+        read_only_fields = ("group",)
