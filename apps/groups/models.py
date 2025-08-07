@@ -1,5 +1,7 @@
 from django.db import models
 
+from apps.users.models import Image  # Image 모델 임포트
+
 
 # ERD의 'groups' 테이블에 해당하는 Django 모델입니다.
 # 이 모델은 아이돌 그룹의 핵심 정보를 정의하며, 데이터베이스 테이블과 직접적으로 매핑됩니다.
@@ -18,10 +20,13 @@ class Group(models.Model):
     # 그룹의 소속사 이름입니다.
     agency = models.CharField(max_length=100, help_text="소속사")
 
-    # 그룹 로고 이미지의 URL 주소입니다.
-    # URLField는 URL 형식을 검증하며, blank=True와 null=True는 이 필드가 비어있어도 됨을 의미합니다.
-    logo_image_url = models.URLField(
-        max_length=2083, blank=True, null=True, help_text="로고 이미지 URL"
+    # 그룹 로고 이미지 ID (Image 모델의 ForeignKey)
+    logo_image = models.ForeignKey(
+        Image,
+        on_delete=models.SET_NULL,  # 이미지가 삭제되어도 그룹 정보는 유지
+        null=True,  # 로고 이미지가 없을 수도 있습니다.
+        blank=True,
+        related_name="group_logos",  # 역참조 이름 설정
     )
 
     # 레코드가 처음 생성된 날짜와 시간입니다.
@@ -31,6 +36,11 @@ class Group(models.Model):
     # 레코드가 마지막으로 수정된 날짜와 시간입니다.
     # auto_now=True는 객체가 저장될 때마다 현재 시간으로 자동 업데이트되도록 합니다.
     updated_at = models.DateTimeField(auto_now=True, help_text="수정 일시")
+
+    class Meta:
+        # Django 관리자 페이지에 표시될 이름을 설정합니다.
+        verbose_name = "그룹"
+        verbose_name_plural = "그룹들"
 
     # 객체를 문자열로 표현할 때 사용되는 메서드입니다.
     # Django 관리자 페이지나 디버깅 시 그룹의 이름을 쉽게 식별할 수 있도록 합니다.

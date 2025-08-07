@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.db import transaction
+from django.utils.html import format_html
 
 from .models import CustomUser, GroupBookmark, IdolBookmark, Image
 
@@ -13,7 +14,16 @@ class CustomUserAdminForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = "__all__"
+        fields = (
+            "email",
+            "nickname",
+            "password",  # For creating/changing password
+            "role",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "profile_image_upload",  # Custom field for image upload
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,12 +65,37 @@ class CustomUserAdminForm(forms.ModelForm):
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     form = CustomUserAdminForm  # Use the custom form
-    list_display = ("email", "nickname", "role", "created_at", "updated_at")
+    list_display = (
+        "email",
+        "nickname",
+        "role",
+        "get_profile_image_url",
+        "created_at",
+        "updated_at",
+    )
     list_filter = ("role",)
     search_fields = ("email", "nickname")
     # Exclude the original profile_image ForeignKey field from the form
     # as we are handling it via profile_image_upload
     exclude = ("profile_image",)  # This will hide the ForeignKey dropdown
+
+    # readonly_fields: 관리자 페이지에서 수정할 수 없는 필드를 지정합니다.
+    readonly_fields = (
+        "get_profile_image_url",
+        "created_at",
+        "updated_at",
+        "date_joined",
+        "last_login",
+    )
+
+    def get_profile_image_url(self, obj):
+        if obj.profile_image and obj.profile_image.url:
+            return format_html(
+                '<img src="{}" width="50" height="50" />', obj.profile_image.url
+            )
+        return ""
+
+    get_profile_image_url.short_description = "프로필 이미지"
 
 
 @admin.register(Image)
