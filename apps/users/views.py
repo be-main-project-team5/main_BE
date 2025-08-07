@@ -134,7 +134,7 @@ class UserLogoutView(APIView):
 
             response = Response(
                 {"message": "성공적으로 로그아웃되었습니다."},
-                status=status.HTTP_205_RESET_CONTENT,  # or HTTP_204_NO_CONTENT
+                status=status.HTTP_204_NO_CONTENT,  # HTTP_204_NO_CONTENT로 변경
             )
             response.set_cookie(
                 "refresh_token",
