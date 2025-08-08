@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db import transaction
 from django.utils.html import format_html
 
-from .models import CustomUser, GroupBookmark, IdolBookmark, Image
+from .models import CustomUser, Image
 
 
 # Custom form for CustomUserAdmin to handle image upload
@@ -102,15 +102,3 @@ class CustomUserAdmin(admin.ModelAdmin):
 class ImageAdmin(admin.ModelAdmin):
     list_display = ("url", "file_size", "created_at")
     search_fields = ("url",)
-
-
-@admin.register(IdolBookmark)
-class IdolBookmarkAdmin(admin.ModelAdmin):
-    list_display = ("user", "idol_id", "created_at")
-    search_fields = ("user__email",)
-
-
-@admin.register(GroupBookmark)
-class GroupBookmarkAdmin(admin.ModelAdmin):
-    list_display = ("user", "group_id", "created_at")
-    search_fields = ("user__email",)

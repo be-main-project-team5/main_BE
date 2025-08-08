@@ -19,13 +19,32 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 urlpatterns = [
     # Django admin 사이트 URL
     path("admin/", admin.site.urls),
     path("api/v1/users/", include("apps.users.urls")),
-# /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
+    # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/idols/", include("apps.idols.urls")),
     # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/groups/", include("apps.groups.urls")),
+    path("api/v1/bookmarks/", include("apps.bookmarks.urls")),
+    path("test/", include("apps.test_app.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    # Optional UI:
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

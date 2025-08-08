@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('groups', '0003_remove_group_logo_image_url_group_logo_image'),
+        ("groups", "0003_remove_group_logo_image_url_group_logo_image"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='group',
-            options={'verbose_name': '그룹', 'verbose_name_plural': '그룹들'},
+            name="group",
+            options={"verbose_name": "그룹", "verbose_name_plural": "그룹들"},
         ),
     ]

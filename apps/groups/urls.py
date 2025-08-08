@@ -20,7 +20,7 @@ router = DefaultRouter()
 # - PATCH /groups/{id}/: 특정 ID의 그룹 부분 업데이트
 # - DELETE /groups/{id}/: 특정 ID의 그룹 삭제
 # GroupViewSet은 'apps/groups/views.py'에 정의되어 있습니다.
-router.register(r"groups", GroupViewSet)
+router.register(r"", GroupViewSet)
 
 # 'groups' 애플리케이션의 URL 패턴을 정의합니다.
 # path('', include(router.urls))는 DefaultRouter가 생성한 모든 URL 패턴을 이 애플리케이션의 루트 경로에 포함시킵니다.
