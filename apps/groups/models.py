@@ -46,3 +46,30 @@ class Group(models.Model):
     # Django 관리자 페이지나 디버깅 시 그룹의 이름을 쉽게 식별할 수 있도록 합니다.
     def __str__(self):
         return self.name
+
+
+class GroupSchedule(models.Model):
+    """
+    그룹 스케줄 모델
+    """
+
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="schedules",
+        help_text="스케줄이 속한 그룹",
+    )
+    start_time = models.DateTimeField(help_text="시작 시간")
+    end_time = models.DateTimeField(help_text="종료 시간")
+    location = models.CharField(max_length=5000, help_text="장소")
+    description = models.CharField(max_length=5000, help_text="설명")
+    is_public = models.BooleanField(default=True, help_text="공개 여부")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="생성 일시")
+    updated_at = models.DateTimeField(auto_now=True, help_text="수정 일시")
+
+    class Meta:
+        verbose_name = "그룹 스케줄"
+        verbose_name_plural = "그룹 스케줄들"
+
+    def __str__(self):
+        return f"{self.group.name} - {self.description[:20]}"

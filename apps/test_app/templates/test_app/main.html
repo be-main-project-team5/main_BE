@@ -1,0 +1,44 @@
+<h1>Test App Main</h1>
+
+{% if user.is_authenticated %}
+    <p>환영합니다, {{ user.nickname }}님!</p>
+    {% if user_profile_image_url %}
+        <img src="{{ user_profile_image_url }}" alt="프로필 이미지" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+    {% else %}
+        <p>프로필 이미지가 없습니다.</p>
+    {% endif %}
+    <ul>
+        <li><a href="/test/profile/">내 프로필</a></li>
+        <li><a href="/test/logout/">로그아웃</a></li>
+        <li><a href="/test/idols/">아이돌 목록</a></li>
+        <li><a href="/test/groups/">그룹 목록</a></li>
+    </ul>
+
+    <h2>내가 북마크한 아이돌</h2>
+    {% if bookmarked_idols %}
+        <ul>
+            {% for bookmark in bookmarked_idols %}
+                <li><a href="/test/idols/{{ bookmark.idol.id }}/" style="text-decoration: none; color: black;">{{ bookmark.idol.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>북마크한 아이돌이 없습니다.</p>
+    {% endif %}
+
+    <h2>내가 북마크한 그룹</h2>
+    {% if bookmarked_groups %}
+        <ul>
+            {% for bookmark in bookmarked_groups %}
+                <li>{{ bookmark.group.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>북마크한 그룹이 없습니다.</p>
+    {% endif %}
+
+{% else %}
+    <ul>
+        <li><a href="/test/signup/">회원가입</a></li>
+        <li><a href="/test/login/">로그인</a></li>
+    </ul>
+{% endif %}
