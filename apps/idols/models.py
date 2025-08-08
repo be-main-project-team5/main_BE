@@ -1,15 +1,10 @@
+from django.conf import settings
 from django.db import models
-
-from apps.users.models import CustomUser
 
 
 class Idol(models.Model):
-    user = models.OneToOneField(
-        CustomUser, on_delete=models.CASCADE
-    )  # 유저와 1대1이므로 원투원 필드 사용
-    group = models.ForeignKey(
-        "groups.Group", on_delete=models.SET_NULL, null=True, blank=True
-    )
+    user = models.OneToOneField( settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # 유저와 1대1이므로 원투원 필드 사용
+    group = models.ForeignKey("groups.Group", on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -19,7 +14,7 @@ class Idol(models.Model):
 
 
 class IdolManager(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     idol = models.ForeignKey(Idol, on_delete=models.CASCADE)
 
     class Meta:
@@ -35,7 +30,7 @@ class IdolManager(models.Model):
 class IdolSchedule(models.Model):
     idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="schedules")
     manager = models.ForeignKey(  # 작성자
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

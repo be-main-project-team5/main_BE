@@ -58,6 +58,7 @@ THIRD_PARTY_APPS = [
     "apps.chats",
     "apps.bookmarks",
     "apps.alarms",
+    "apps.test_app.apps.TestAppConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
@@ -179,6 +180,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,  # 페이지네이션 기본 크기
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 

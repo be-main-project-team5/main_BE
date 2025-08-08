@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.files.storage import default_storage
 from django.db import models
 
+from apps.idols.models import IdolSchedule
+
 
 # Image 모델 정의 (프로필 이미지, 로고 이미지 등에 사용) / 나중에 common 앱으로 이동할 수 있다.
 class Image(models.Model):
@@ -142,108 +144,44 @@ class CustomUser(AbstractUser):
         return self.email
 
 
-# IdolBookmark 모델 정의
-class IdolBookmark(models.Model):
-    # 북마크한 사용자 (CustomUser 모델의 ForeignKey)
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,  # 사용자가 삭제되면 북마크도 삭제
-        null=False,
-        blank=False,
-        related_name="idol_bookmarks",  # 역참조 이름 설정
-    )
-    # 북마크된 아이돌 (idols 테이블의 ForeignKey - 추후 연결)
-    idol_id = models.BigIntegerField(
-        null=False, blank=False
-    )  # 임시: Idol 모델 ForeignKey로 변경 필요
-
-    # 북마크 생성 일시를 자동으로 기록합니다.
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # 데이터베이스 테이블 이름을 명시적으로 지정합니다.
-        db_table = "idols_bookmarks"
-        # Django 관리자 페이지에 표시될 이름을 설정합니다.
-        verbose_name = "아이돌 즐겨찾기"
-        verbose_name_plural = "아이돌 즐겨찾기들"
-        # user와 idol_id 조합이 고유해야 합니다. (한 사용자가 같은 아이돌을 두 번 북마크할 수 없음)
-        unique_together = ("user", "idol_id")
-
-    def __str__(self):
-        # 객체를 문자열로 표현할 때 사용자 이메일과 아이돌 ID를 반환합니다.
-        return f"{self.user.email} - 아이돌: {self.idol_id}"
-
-
-# GroupBookmark 모델 정의
-# 다이어그램의 groups_bookmarks 테이블에 해당합니다.
-class GroupBookmark(models.Model):
-    # 북마크한 사용자 (CustomUser 모델의 ForeignKey)
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,  # 사용자가 삭제되면 북마크도 삭제
-        null=False,
-        blank=False,
-        related_name="group_bookmarks",  # 역참조 이름 설정
-    )
-    # 북마크된 그룹 (groups 테이블의 ForeignKey - 추후 연결)
-    group_id = models.BigIntegerField(
-        null=False, blank=False
-    )  # 임시: Group 모델 ForeignKey로 변경 필요
-
-    # 북마크 생성 일시를 자동으로 기록합니다.
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        # 데이터베이스 테이블 이름을 명시적으로 지정합니다.
-        db_table = "groups_bookmarks"
-        # Django 관리자 페이지에 표시될 이름을 설정합니다.
-        verbose_name = "그룹 즐겨찾기"
-        verbose_name_plural = "그룹 즐겨찾기들"
-        # user와 group_id 조합이 고유해야 합니다. (한 사용자가 같은 그룹을 두 번 북마크할 수 없음)
-        unique_together = ("user", "group_id")
-
-    def __str__(self):
-        # 객체를 문자열로 표현할 때 사용자 이메일과 그룹 ID를 반환합니다.
-        return f"{self.user.email} - 그룹: {self.group_id}"
-
-
 # 사용자가 자신의 스케줄에 추가한 일정을 기록합니다.
-# class UserSchedule(models.Model):
-#     user = models.ForeignKey(
-#         CustomUser,
-#         on_delete=models.CASCADE,
-#         null=False,
-#         blank=False,
-#         related_name='my_schedules'
-#     )
-#     # 아이돌 스케줄 또는 그룹 스케줄 중 하나를 참조
-#     idol_schedule = models.ForeignKey(
-#         IdolSchedule,
-#         on_delete=models.CASCADE,
-#         null=True, # 둘 중 하나는 null이 될 수 있음
-#         blank=True,
-#         related_name='user_added_schedules'
-#     )
-#     group_schedule = models.ForeignKey(
-#         GroupSchedule,
-#         on_delete=models.CASCADE,
-#         null=True, # 둘 중 하나는 null이 될 수 있음
-#         blank=True,
-#         related_name='user_added_schedules'
-#     )
-#     added_at = models.DateTimeField(auto_now_add=True)
-#
-#     class Meta:
-#         db_table = 'user_schedules'
-#         verbose_name = '사용자 스케줄'
-#         verbose_name_plural = '사용자 스케줄들'
-#         # 한 사용자가 동일한 아이돌 스케줄 또는 그룹 스케줄을 두 번 추가할 수 없도록
-#         unique_together = (('user', 'idol_schedule'), ('user', 'group_schedule'))
-#
-#
-#     def __str__(self):
-#         if self.idol_schedule:
-#             return f"{self.user.email} - 아이돌 스케줄: {self.idol_schedule.description}"
-#         elif self.group_schedule:
-#             return f"{self.user.email} - 그룹 스케줄: {self.group_schedule.description}"
-#         return f"{self.user.email} - 스케줄 없음"
+class UserSchedule(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        related_name="my_schedules",
+    )
+    # 아이돌 스케줄 또는 그룹 스케줄 중 하나를 참조
+    idol_schedule = models.ForeignKey(
+        IdolSchedule,
+        on_delete=models.CASCADE,
+        null=True,  # 둘 중 하나는 null이 될 수 있음
+        blank=True,
+        related_name="user_added_schedules",
+    )
+    # group_schedule = models.ForeignKey(
+    #     GroupSchedule,
+    #     on_delete=models.CASCADE,
+    #     null=True, # 둘 중 하나는 null이 될 수 있음
+    #     blank=True,
+    #     related_name='user_added_schedules'
+    # )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "user_schedules"
+        verbose_name = "사용자 스케줄"
+        verbose_name_plural = "사용자 스케줄들"
+        # 한 사용자가 동일한 아이돌 스케줄 또는 그룹 스케줄을 두 번 추가할 수 없도록
+        unique_together = (("user", "idol_schedule"),)
+
+    def __str__(self):
+        if self.idol_schedule:
+            return (
+                f"{self.user.email} - 아이돌 스케줄: {self.idol_schedule.description}"
+            )
+        # elif self.group_schedule:
+        #     return f"{self.user.email} - 그룹 스케줄: {self.group_schedule.description}"
+        return f"{self.user.email} - 스케줄 없음"

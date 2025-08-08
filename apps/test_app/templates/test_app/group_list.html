@@ -1,0 +1,25 @@
+<h1>그룹 목록</h1>
+
+{% if user.is_authenticated %}
+    <ul>
+        {% for group in groups %}
+            <li>
+                {{ group.name }}
+                <form method="post" action="/test/bookmark_group/{{ group.id }}/" style="display:inline;">
+                    {% csrf_token %}
+                    {% if group.is_bookmarked %}
+                        <button type="submit" name="action" value="remove">북마크 해제</button>
+                    {% else %}
+                        <button type="submit" name="action" value="add">북마크 추가</button>
+                    {% endif %}
+                </form>
+            </li>
+        {% empty %}
+            <li>그룹이 없습니다.</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>로그인해야 그룹 목록을 볼 수 있습니다.</p>
+{% endif %}
+
+<p><a href="/test/">메인으로 돌아가기</a></p>
