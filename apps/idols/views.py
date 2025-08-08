@@ -3,8 +3,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Idol, IdolManager, IdolSchedule
-from .serializers import IdolScheduleSerializer, IdolSerializer
+from .models import Idol, IdolManager
+from .serializers import IdolSerializer
 
 
 class IdolListView(APIView):

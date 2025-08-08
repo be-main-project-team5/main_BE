@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 from apps.users.models import Image  # Image 모델 임포트
 
@@ -40,7 +41,7 @@ class Group(models.Model):
     class Meta:
         # Django 관리자 페이지에 표시될 이름을 설정합니다.
         verbose_name = "그룹"
-        verbose_name_plural = "그룹들"
+        verbose_name_plural = "그룹"
 
     # 객체를 문자열로 표현할 때 사용되는 메서드입니다.
     # Django 관리자 페이지나 디버깅 시 그룹의 이름을 쉽게 식별할 수 있도록 합니다.
@@ -48,28 +49,4 @@ class Group(models.Model):
         return self.name
 
 
-class GroupSchedule(models.Model):
-    """
-    그룹 스케줄 모델
-    """
 
-    group = models.ForeignKey(
-        Group,
-        on_delete=models.CASCADE,
-        related_name="schedules",
-        help_text="스케줄이 속한 그룹",
-    )
-    start_time = models.DateTimeField(help_text="시작 시간")
-    end_time = models.DateTimeField(help_text="종료 시간")
-    location = models.CharField(max_length=5000, help_text="장소")
-    description = models.CharField(max_length=5000, help_text="설명")
-    is_public = models.BooleanField(default=True, help_text="공개 여부")
-    created_at = models.DateTimeField(auto_now_add=True, help_text="생성 일시")
-    updated_at = models.DateTimeField(auto_now=True, help_text="수정 일시")
-
-    class Meta:
-        verbose_name = "그룹 스케줄"
-        verbose_name_plural = "그룹 스케줄들"
-
-    def __str__(self):
-        return f"{self.group.name} - {self.description[:20]}"

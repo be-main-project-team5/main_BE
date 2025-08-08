@@ -24,4 +24,7 @@ urlpatterns = [
         views.add_user_schedule_view,
         name="add_user_schedule",
     ),
+    path("my_schedules/", views.my_schedules_view, name="my_schedules"),
+    path("manager_schedule_test/", views.manager_schedule_test_view, name="manager_schedule_test"),
+    path("add_schedule/", views.add_schedule_view, name="add_schedule"),
 ]

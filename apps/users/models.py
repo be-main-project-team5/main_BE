@@ -5,8 +5,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.files.storage import default_storage
 from django.db import models
 
-from apps.idols.models import IdolSchedule
-
 
 # Image 모델 정의 (프로필 이미지, 로고 이미지 등에 사용) / 나중에 common 앱으로 이동할 수 있다.
 class Image(models.Model):
@@ -137,51 +135,8 @@ class CustomUser(AbstractUser):
         db_table = "users"
         # Django 관리자 페이지에 표시될 이름을 설정합니다.
         verbose_name = "사용자"
-        verbose_name_plural = "사용자들"
+        verbose_name_plural = "사용자"
 
     def __str__(self):
         # 객체를 문자열로 표현할 때 이메일 주소를 반환합니다.
         return self.email
-
-
-# 사용자가 자신의 스케줄에 추가한 일정을 기록합니다.
-class UserSchedule(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        null=False,
-        blank=False,
-        related_name="my_schedules",
-    )
-    # 아이돌 스케줄 또는 그룹 스케줄 중 하나를 참조
-    idol_schedule = models.ForeignKey(
-        IdolSchedule,
-        on_delete=models.CASCADE,
-        null=True,  # 둘 중 하나는 null이 될 수 있음
-        blank=True,
-        related_name="user_added_schedules",
-    )
-    # group_schedule = models.ForeignKey(
-    #     GroupSchedule,
-    #     on_delete=models.CASCADE,
-    #     null=True, # 둘 중 하나는 null이 될 수 있음
-    #     blank=True,
-    #     related_name='user_added_schedules'
-    # )
-    added_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "user_schedules"
-        verbose_name = "사용자 스케줄"
-        verbose_name_plural = "사용자 스케줄들"
-        # 한 사용자가 동일한 아이돌 스케줄 또는 그룹 스케줄을 두 번 추가할 수 없도록
-        unique_together = (("user", "idol_schedule"),)
-
-    def __str__(self):
-        if self.idol_schedule:
-            return (
-                f"{self.user.email} - 아이돌 스케줄: {self.idol_schedule.description}"
-            )
-        # elif self.group_schedule:
-        #     return f"{self.user.email} - 그룹 스케줄: {self.group_schedule.description}"
-        return f"{self.user.email} - 스케줄 없음"

@@ -34,6 +34,7 @@ urlpatterns = [
     # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/groups/", include("apps.groups.urls")),
     path("api/v1/bookmarks/", include("apps.bookmarks.urls")),
+    path("api/v1/schedules/", include("apps.schedules.urls")),
     path("test/", include("apps.test_app.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:

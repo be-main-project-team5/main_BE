@@ -1,7 +1,7 @@
 <h1>Test App Main</h1>
 
 {% if user.is_authenticated %}
-    <p>환영합니다, {{ user.nickname }}님!</p>
+    <p>환영합니다, {{ user.nickname }}님! (역할: {{ user.role }})</p>
     {% if user_profile_image_url %}
         <img src="{{ user_profile_image_url }}" alt="프로필 이미지" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
     {% else %}
@@ -12,28 +12,108 @@
         <li><a href="/test/logout/">로그아웃</a></li>
         <li><a href="/test/idols/">아이돌 목록</a></li>
         <li><a href="/test/groups/">그룹 목록</a></li>
+        <li><a href="/test/my_schedules/">내 스케줄</a></li>
     </ul>
 
-    <h2>내가 북마크한 아이돌</h2>
-    {% if bookmarked_idols %}
-        <ul>
-            {% for bookmark in bookmarked_idols %}
-                <li><a href="/test/idols/{{ bookmark.idol.id }}/" style="text-decoration: none; color: black;">{{ bookmark.idol.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>북마크한 아이돌이 없습니다.</p>
-    {% endif %}
+    
 
-    <h2>내가 북마크한 그룹</h2>
-    {% if bookmarked_groups %}
-        <ul>
-            {% for bookmark in bookmarked_groups %}
-                <li>{{ bookmark.group.name }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>북마크한 그룹이 없습니다.</p>
+    {% if user.role == 'NORMAL' %}
+        <h2>내가 북마크한 아이돌</h2>
+        {% if bookmarked_idols %}
+            <ul>
+                {% for bookmark in bookmarked_idols %}
+                    <li><a href="/test/idols/{{ bookmark.idol.id }}/" style="text-decoration: none; color: black;">{{ bookmark.idol.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>북마크한 아이돌이 없습니다.</p>
+        {% endif %}
+
+        <h2>내가 북마크한 그룹</h2>
+        {% if bookmarked_groups %}
+            <ul>
+                {% for bookmark in bookmarked_groups %}
+                    <li>{{ bookmark.group.name }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>북마크한 그룹이 없습니다.</p>
+        {% endif %}
+
+        
+
+    {% elif user.role == 'IDOL' %}
+        <h2>내 아이돌 정보</h2>
+        {% if my_idol_info %}
+            <p>이름: {{ my_idol_info.name }}</p>
+            <p>그룹: {{ my_idol_info.group.name }}</p>
+            <h3>내 스케줄</h3>
+            {% if my_idol_schedules %}
+                <ul>
+                    {% for schedule in my_idol_schedules %}
+                        <li>{{ schedule.title }} ({{ schedule.start_time|date:"Y-m-d H:i" }} ~ {{ schedule.end_time|date:"Y-m-d H:i" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>등록된 스케줄이 없습니다.</p>
+            {% endif %}
+            
+        {% else %}
+            <p>아직 아이돌 정보가 등록되지 않았습니다.</p>
+        {% endif %}
+
+    {% elif user.role == 'MANAGER' %}
+        <h2>관리하는 아이돌</h2>
+        {% if managed_idols %}
+            <ul>
+                {% for manager_entry in managed_idols %}
+                    <li>{{ manager_entry.idol.name }}</li>
+                {% endfor %}
+            </ul>
+            <h3>관리하는 아이돌 스케줄</h3>
+            {% if managed_idol_schedules %}
+                <ul>
+                    {% for schedule in managed_idol_schedules %}
+                        <li>{{ schedule.idol.name }} - {{ schedule.title }} ({{ schedule.start_time|date:"Y-m-d H:i" }} ~ {{ schedule.end_time|date:"Y-m-d H:i" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>관리하는 아이돌의 스케줄이 없습니다.</p>
+            {% endif %}
+
+            <hr>
+            <h3>새 스케줄 등록</h3>
+            <form action="{% url 'add_schedule' %}" method="post">
+                {% csrf_token %}
+                <label for="idol">아이돌 선택:</label>
+                <select name="idol" id="idol">
+                    {% for manager_entry in managed_idols %}
+                        <option value="{{ manager_entry.idol.id }}">{{ manager_entry.idol.name }}</option>
+                    {% endfor %}
+                </select><br><br>
+                <label for="title">제목:</label>
+                <input type="text" name="title" id="title" required><br><br>
+                <label for="start_time">시작 시간:</label>
+                <input type="datetime-local" name="start_time" id="start_time" required><br><br>
+                <label for="end_time">종료 시간:</label>
+                <input type="datetime-local" name="end_time" id="end_time" required><br><br>
+                <label for="location">장소:</label>
+                <input type="text" name="location" id="location"><br><br>
+                <label for="description">설명:</label>
+                <textarea name="description" id="description"></textarea><br><br>
+                <button type="submit">스케줄 등록</button>
+            </form>
+
+        {% else %}
+            <p>관리하는 아이돌이 없습니다.</p>
+        {% endif %}
+
+    {% elif user.role == 'ADMIN' %}
+        <h2>관리자 대시보드</h2>
+        <p>총 사용자 수: {{ total_users }}</p>
+        <p>총 아이돌 수: {{ total_idols }}</p>
+        <p>총 그룹 수: {{ total_groups }}</p>
+
     {% endif %}
 
 {% else %}
@@ -42,3 +122,4 @@
         <li><a href="/test/login/">로그인</a></li>
     </ul>
 {% endif %}
+
