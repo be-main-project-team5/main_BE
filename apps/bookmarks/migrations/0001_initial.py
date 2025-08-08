@@ -4,35 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='GroupBookmark',
+            name="GroupBookmark",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': '그룹 즐겨찾기',
-                'verbose_name_plural': '그룹 즐겨찾기들',
-                'db_table': 'bookmarks_groupbookmark',
+                "verbose_name": "그룹 즐겨찾기",
+                "verbose_name_plural": "그룹 즐겨찾기들",
+                "db_table": "bookmarks_groupbookmark",
             },
         ),
         migrations.CreateModel(
-            name='IdolBookmark',
+            name="IdolBookmark",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': '아이돌 즐겨찾기',
-                'verbose_name_plural': '아이돌 즐겨찾기들',
-                'db_table': 'bookmarks_idolbookmark',
+                "verbose_name": "아이돌 즐겨찾기",
+                "verbose_name_plural": "아이돌 즐겨찾기들",
+                "db_table": "bookmarks_idolbookmark",
             },
         ),
     ]

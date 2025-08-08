@@ -5,23 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('groups', '0001_initial'),
-        ('users', '0001_initial'),
+        ("groups", "0001_initial"),
+        ("users", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='group',
-            name='logo_image',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='group_logos', to='users.image'),
+            model_name="group",
+            name="logo_image",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="group_logos",
+                to="users.image",
+            ),
         ),
         migrations.AddField(
-            model_name='groupschedule',
-            name='group',
-            field=models.ForeignKey(help_text='스케줄이 속한 그룹', on_delete=django.db.models.deletion.CASCADE, related_name='schedules', to='groups.group'),
+            model_name="groupschedule",
+            name="group",
+            field=models.ForeignKey(
+                help_text="스케줄이 속한 그룹",
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="schedules",
+                to="groups.group",
+            ),
         ),
     ]

@@ -6,37 +6,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('bookmarks', '0002_initial'),
-        ('idols', '0001_initial'),
+        ("bookmarks", "0002_initial"),
+        ("idols", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='groupbookmark',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='group_bookmarks', to=settings.AUTH_USER_MODEL),
+            model_name="groupbookmark",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="group_bookmarks",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='idolbookmark',
-            name='idol',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarked_by_users', to='idols.idol'),
+            model_name="idolbookmark",
+            name="idol",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bookmarked_by_users",
+                to="idols.idol",
+            ),
         ),
         migrations.AddField(
-            model_name='idolbookmark',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='idol_bookmarks', to=settings.AUTH_USER_MODEL),
+            model_name="idolbookmark",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="idol_bookmarks",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='groupbookmark',
-            unique_together={('user', 'group')},
+            name="groupbookmark",
+            unique_together={("user", "group")},
         ),
         migrations.AlterUniqueTogether(
-            name='idolbookmark',
-            unique_together={('user', 'idol')},
+            name="idolbookmark",
+            unique_together={("user", "idol")},
         ),
     ]

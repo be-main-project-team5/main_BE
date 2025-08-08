@@ -1,8 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny  # AllowAny를 임포트합니다.
 
-from .models import Group
-from .serializers import GroupSerializer
+from .models import Group, GroupSchedule
+from .serializers import GroupScheduleSerializer, GroupSerializer
 
 
 # Django REST Framework의 ViewSet을 사용하여 Group 모델에 대한 API 엔드포인트를 제공합니다.
@@ -24,12 +25,6 @@ class GroupViewSet(viewsets.ModelViewSet):
     # AllowAny는 어떤 사용자든(인증되지 않은 사용자 포함) 이 API에 접근할 수 있도록 허용합니다.
     # 이는 개발 및 테스트 목적으로 임시로 설정하는 것이며, 실제 서비스에서는 적절한 인증 및 권한 설정이 필요합니다.
     permission_classes = [AllowAny]
-
-
-from rest_framework.generics import get_object_or_404
-
-from .models import GroupSchedule
-from .serializers import GroupScheduleSerializer
 
 
 class GroupScheduleViewSet(viewsets.ModelViewSet):
