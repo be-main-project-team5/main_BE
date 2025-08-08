@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .models import Group
 
 # 이 파일은 Django 관리자(Admin) 사이트에 Group 모델을 등록하여
 # 관리자가 웹 인터페이스를 통해 Group 데이터를 쉽게 관리(생성, 조회, 수정, 삭제)할 수 있도록 합니다.
