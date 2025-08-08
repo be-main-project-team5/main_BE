@@ -6,42 +6,58 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('idols', '0001_initial'),
+        ("idols", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='idol',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="idol",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='idolmanager',
-            name='idol',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='idols.idol'),
+            model_name="idolmanager",
+            name="idol",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="idols.idol"
+            ),
         ),
         migrations.AddField(
-            model_name='idolmanager',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="idolmanager",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='idolschedule',
-            name='idol',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='schedules', to='idols.idol'),
+            model_name="idolschedule",
+            name="idol",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="schedules",
+                to="idols.idol",
+            ),
         ),
         migrations.AddField(
-            model_name='idolschedule',
-            name='manager',
-            field=models.ForeignKey(blank=True, help_text='이 스케줄을 작성한 아이돌 매니저', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='written_schedules', to=settings.AUTH_USER_MODEL),
+            model_name="idolschedule",
+            name="manager",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="이 스케줄을 작성한 아이돌 매니저",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="written_schedules",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='idolmanager',
-            unique_together={('user', 'idol')},
+            name="idolmanager",
+            unique_together={("user", "idol")},
         ),
     ]

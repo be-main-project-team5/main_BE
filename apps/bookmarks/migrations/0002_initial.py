@@ -5,18 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('bookmarks', '0001_initial'),
-        ('groups', '0001_initial'),
+        ("bookmarks", "0001_initial"),
+        ("groups", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='groupbookmark',
-            name='group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookmarked_by_users', to='groups.group'),
+            model_name="groupbookmark",
+            name="group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="bookmarked_by_users",
+                to="groups.group",
+            ),
         ),
     ]
