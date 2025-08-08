@@ -2,12 +2,12 @@ from django.db import models
 
 from apps.groups.models import GroupSchedule
 from apps.idols.models import IdolSchedule
-from apps.users.models import BaseUserManager
+from apps.users.models import CustomUser
 
 
 class Alarm(models.Model):
     user = models.ForeignKey(
-        BaseUserManager, on_delete=models.CASCADE, related_name="alarms"
+        CustomUser, on_delete=models.CASCADE, related_name="alarms"
     )
 
     # 연결된 스케줄 (둘 중 하나만 사용)
