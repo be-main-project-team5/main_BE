@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -91,3 +92,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         ]  # 각 ChatParticipant에서 User 객체만 추출합니다.
         serializer = UserSerializer(users, many=True)  # User 객체 목록을 직렬화합니다.
         return Response(serializer.data)
+
+
+def test_chat_room(request, room_name):
+    return render(request, "chats/testHTML.html", {"room_name": room_name})

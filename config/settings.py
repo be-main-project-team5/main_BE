@@ -62,7 +62,13 @@ THIRD_PARTY_APPS = [
     "apps.test_app.apps.TestAppConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = (
+    [
+        "daphne",
+    ]
+    + DJANGO_APPS
+    + THIRD_PARTY_APPS
+)
 
 
 MIDDLEWARE = [
@@ -235,7 +241,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("127.0.0.1", 6380)],
         },
     },
 }
