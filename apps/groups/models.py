@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.idols.models import IdolManager  # IdolManager 모델 임포트
 from apps.users.models import Image  # Image 모델 임포트
 
 
@@ -59,6 +60,17 @@ class GroupSchedule(models.Model):
         related_name="schedules",
         help_text="스케줄이 속한 그룹",
     )
+
+    # 스케줄 작성자: 아이돌 매니저
+    manager = models.ForeignKey(
+        IdolManager,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="group_schedules",
+        help_text="이 스케줄을 작성한 아이돌 매니저",
+    )
+
     start_time = models.DateTimeField(help_text="시작 시간")
     end_time = models.DateTimeField(help_text="종료 시간")
     location = models.CharField(max_length=5000, help_text="장소")
