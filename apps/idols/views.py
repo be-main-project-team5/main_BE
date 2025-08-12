@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status
+from rest_framework import generics, permissions, status
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -7,14 +8,12 @@ from .models import Idol, IdolManager
 from .serializers import IdolSerializer
 
 
-class IdolListView(APIView):
+class IdolListView(generics.ListAPIView):
+    queryset = Idol.objects.all()
+    serializer_class = IdolSerializer
     permission_classes = [permissions.IsAuthenticated]  # 로그인 된 사용자 이용 가능
-
-    # 아이돌 전체 목록 조회
-    def get(self, request):
-        idols = Idol.objects.all()
-        serializer = IdolSerializer(idols, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
 
     # 특정 아이돌 상세 조회
 
@@ -95,3 +94,37 @@ class IdolScheduleDetailView(APIView):
         schedule.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+from apps.schedules.models import IdolSchedule
+from apps.schedules.serializers import IdolScheduleSerializer
+from datetime import date
+
+
+class IdolMainboardView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.role != 'IDOL':
+            return Response(
+                {"detail": "아이돌만 접근할 수 있습니다."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            idol = Idol.objects.get(user=user)
+        except Idol.DoesNotExist:
+            return Response(
+                {"detail": "해당 사용자와 연결된 아이돌 정보가 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        today = date.today()
+        schedules = IdolSchedule.objects.filter(
+            idol=idol,
+            start_time__date=today
+        ).order_by('start_time')
+
+        serializer = IdolScheduleSerializer(schedules, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

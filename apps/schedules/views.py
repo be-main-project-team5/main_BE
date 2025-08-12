@@ -105,3 +105,29 @@ class ManagerScheduleViewSet(viewsets.ModelViewSet):
         # 스케줄 삭제 시, 해당 스케줄이 매니저가 담당하는 아이돌의 것인지 확인
         self.check_object_permissions(self.request, instance)
         instance.delete()
+
+
+from rest_framework.views import APIView
+from datetime import date
+
+
+class ManagerMainboardView(APIView):
+    permission_classes = [IsManagerOrAdmin]
+
+    def get(self, request):
+        user = request.user
+        if user.role != 'MANAGER':
+            return Response(
+                {"detail": "매니저만 접근할 수 있습니다."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        managed_idols = IdolManager.objects.filter(user=user).values_list('idol__id', flat=True)
+        today = date.today()
+        schedules = IdolSchedule.objects.filter(
+            idol__id__in=managed_idols,
+            start_time__date=today
+        ).order_by('start_time')
+
+        serializer = IdolScheduleSerializer(schedules, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

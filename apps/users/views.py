@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.conf import settings
 from django.db import transaction
 from rest_framework import generics, status
@@ -9,8 +11,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from apps.bookmarks.models import GroupBookmark, IdolBookmark
+from apps.schedules.models import GroupSchedule, IdolSchedule, UserSchedule
 from .models import CustomUser
 from .serializers import (
+    FanMainboardSerializer,
     PasswordChangeSerializer,
     UserDeleteSerializer,
     UserLoginSerializer,
@@ -102,6 +107,7 @@ class UserLoginView(APIView):
                 "access_token": tokens["access"],
                 "refresh_token": tokens["refresh"],
                 "profile_image_url": profile_image_url,  # 프로필 이미지 URL 추가
+                "role": user.role, # 역할 정보 추가
             },
             status=status.HTTP_200_OK,
         )
@@ -287,3 +293,34 @@ class UserDeleteView(APIView):
                 {"detail": f"회원 탈퇴 처리 중 오류가 발생했습니다. ({str(e)})"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class FanMainboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        today = date.today()
+
+        # Get bookmarked idols and groups
+        bookmarked_idols = IdolBookmark.objects.filter(user=user).values_list("idol_id", flat=True)
+        bookmarked_groups = GroupBookmark.objects.filter(user=user).values_list("group_id", flat=True)
+
+        # Get schedules for bookmarked idols and groups for today
+        idol_schedules = IdolSchedule.objects.filter(idol_id__in=bookmarked_idols, start_time__date=today)
+        group_schedules = GroupSchedule.objects.filter(group_id__in=bookmarked_groups, start_time__date=today)
+
+        # Get user's favorited schedules for today
+        user_schedules = UserSchedule.objects.filter(user=user, idol_schedule__start_time__date=today).select_related('idol_schedule')
+        user_group_schedules = UserSchedule.objects.filter(user=user, group_schedule__start_time__date=today).select_related('group_schedule')
+
+        # Combine all schedules
+        all_schedules = list(idol_schedules) + list(group_schedules)
+        all_schedules += [us.idol_schedule for us in user_schedules if us.idol_schedule]
+        all_schedules += [ugs.group_schedule for ugs in user_group_schedules if ugs.group_schedule]
+
+        # Remove duplicates
+        all_schedules = list(set(all_schedules))
+
+        serializer = FanMainboardSerializer(all_schedules, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

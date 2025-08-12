@@ -5,10 +5,12 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.files.storage import default_storage
 from rest_framework import serializers
 
+from apps.schedules.serializers import (
+    GroupScheduleSerializer,
+    IdolScheduleSerializer,
+)
+from apps.schedules.models import GroupSchedule, IdolSchedule
 from .models import CustomUser, Image
-
-# from apps.idols.serializers import IdolScheduleSerializer
-# from apps.groups.serializers import GroupScheduleSerializer
 
 
 # Image 모델을 위한 Serializer
@@ -235,4 +237,20 @@ class UserDeleteSerializer(serializers.Serializer):
         return data
 
 
+class FanMainboardSerializer(serializers.Serializer):
+    schedule_type = serializers.SerializerMethodField()
+    schedule = serializers.SerializerMethodField()
 
+    def get_schedule_type(self, obj):
+        if isinstance(obj, IdolSchedule):
+            return 'idol_schedule'
+        elif isinstance(obj, GroupSchedule):
+            return 'group_schedule'
+        return None
+
+    def get_schedule(self, obj):
+        if isinstance(obj, IdolSchedule):
+            return IdolScheduleSerializer(obj).data
+        elif isinstance(obj, GroupSchedule):
+            return GroupScheduleSerializer(obj).data
+        return None

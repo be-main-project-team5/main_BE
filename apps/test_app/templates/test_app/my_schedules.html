@@ -42,6 +42,10 @@
                         {% else %}
                             <div class="schedule-type">알 수 없는 스케줄</div>
                         {% endif %}
+                        <form method="post" action="/test/remove_user_schedule/{{ user_schedule.id }}/" style="display:inline; margin-left: 10px;">
+                            {% csrf_token %}
+                            <button type="submit">제거</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매니저 메인보드</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #e9e9e9; margin-bottom: 10px; padding: 10px; border-radius: 5px; }
+        .schedule-title { font-weight: bold; color: #0056b3; }
+        .schedule-time { font-size: 0.9em; color: #666; }
+        .schedule-location { font-size: 0.9em; color: #666; }
+        .schedule-description { font-size: 0.9em; color: #444; }
+        .no-schedules { color: #888; }
+        a { text-decoration: none; color: #007bff; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>매니저 메인보드 - 담당 아이돌 스케줄</h1>
+        <p><a href="/test/">메인으로 돌아가기</a></p>
+    </div>
+
+    <div class="container">
+        <h2>담당하는 아이돌 스케줄(오늘)</h2>
+        {% if today_schedules %}
+            <ul>
+                {% for schedule in today_schedules %}
+                    <li>
+                        <div class="schedule-title">{{ schedule.idol.name }} - {{ schedule.title }}</div>
+                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
+                        <div class="schedule-location">장소: {{ schedule.location }}</div>
+                        <div class="schedule-description">설명: {{ schedule.description }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-schedules">오늘 예정된 담당 아이돌 스케줄이 없습니다.</p>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <h2>담당하는 아이돌 스케줄(전체)</h2>
+        {% if all_schedules %}
+            <ul>
+                {% for schedule in all_schedules %}
+                    <li>
+                        <div class="schedule-title">{{ schedule.idol.name }} - {{ schedule.title }}</div>
+                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
+                        <div class="schedule-location">장소: {{ schedule.location }}</div>
+                        <div class="schedule-description">설명: {{ schedule.description }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-schedules">등록된 담당 아이돌 전체 스케줄이 없습니다.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

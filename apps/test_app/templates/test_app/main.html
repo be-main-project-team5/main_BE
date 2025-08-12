@@ -12,7 +12,9 @@
         <li><a href="/test/logout/">로그아웃</a></li>
         <li><a href="/test/idols/">아이돌 목록</a></li>
         <li><a href="/test/groups/">그룹 목록</a></li>
-        <li><a href="/test/my_schedules/">내 스케줄</a></li>
+        {% if user.role == 'NORMAL' %}
+        <li><a href="/test/fan_favorites/">즐겨찾기한 페이지 보기</a></li>
+        {% endif %}
     </ul>
 
     
@@ -40,26 +42,75 @@
             <p>북마크한 그룹이 없습니다.</p>
         {% endif %}
 
+        <h2>오늘의 스케줄</h2>
+        {% if fan_mainboard_schedules %}
+            <ul>
+                {% for schedule_entry in fan_mainboard_schedules %}
+                    <li>
+                        <strong>
+                            {% if schedule_entry.schedule_type == 'idol_schedule' %}
+                                {{ schedule_entry.schedule.idol.name }}
+                            {% else %}
+                                {{ schedule_entry.schedule.group.name }}
+                            {% endif %}
+                        </strong> - {{ schedule_entry.schedule.title }}<br>
+                        {{ schedule_entry.schedule.start_time }} ~ {{ schedule_entry.schedule.end_time }} ({{ schedule_entry.schedule.location }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>오늘 예정된 스케줄이 없습니다.</p>
+        {% endif %}
+
+        <h2>내가 북마크한 아이돌의 전체 스케줄</h2>
+        {% if all_bookmarked_schedules %}
+            <ul>
+                {% for entry in all_bookmarked_schedules %}
+                    <li>
+                        <strong>
+                            {% if entry.type == 'idol' %}
+                                {{ entry.schedule.idol.name }} (아이돌)
+                            {% elif entry.type == 'group' %}
+                                {{ entry.schedule.group.name }} (그룹)
+                            {% endif %}
+                        </strong> - {{ entry.schedule.title|default:entry.schedule.description|truncatechars:50 }}<br>
+                        {{ entry.schedule.start_time|date:"Y.m.d H:i" }} ~ {{ entry.schedule.end_time|date:"Y.m.d H:i" }} ({{ entry.schedule.location }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>북마크한 아이돌/그룹의 전체 스케줄이 없습니다.</p>
+        {% endif %}
+
         
 
     {% elif user.role == 'IDOL' %}
-        <h2>내 아이돌 정보</h2>
-        {% if my_idol_info %}
-            <p>이름: {{ my_idol_info.name }}</p>
-            <p>그룹: {{ my_idol_info.group.name }}</p>
-            <h3>내 스케줄</h3>
-            {% if my_idol_schedules %}
-                <ul>
-                    {% for schedule in my_idol_schedules %}
-                        <li>{{ schedule.title }} ({{ schedule.start_time|date:"Y-m-d H:i" }} ~ {{ schedule.end_time|date:"Y-m-d H:i" }})</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>등록된 스케줄이 없습니다.</p>
-            {% endif %}
-            
+        <h2>오늘의 스케줄</h2>
+        {% if idol_mainboard_schedules %}
+            <ul>
+                {% for schedule in idol_mainboard_schedules %}
+                    <li>
+                        <strong>{{ schedule.title }}</strong><br>
+                        {{ schedule.start_time }} ~ {{ schedule.end_time }} ({{ schedule.location }})
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
-            <p>아직 아이돌 정보가 등록되지 않았습니다.</p>
+            <p>오늘 예정된 스케줄이 없습니다.</p>
+        {% endif %}
+
+        <h2>아이돌 스케줄 (전체)</h2>
+        {% if idol_all_schedules %}
+            <ul>
+                {% for schedule in idol_all_schedules %}
+                    <li>
+                        <strong>{{ schedule.title }}</strong><br>
+                        {{ schedule.start_time }} ~ {{ schedule.end_time }} ({{ schedule.location }})
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>등록된 전체 스케줄이 없습니다.</p>
         {% endif %}
 
     {% elif user.role == 'MANAGER' %}
@@ -79,6 +130,21 @@
                 </ul>
             {% else %}
                 <p>관리하는 아이돌의 스케줄이 없습니다.</p>
+            {% endif %}
+
+            <hr>
+            <h2>담당하는 아이돌 스케줄(오늘)</h2>
+            {% if today_managed_schedules %}
+                <ul>
+                    {% for schedule in today_managed_schedules %}
+                        <li>
+                            <strong>{{ schedule.idol.name }}</strong> - {{ schedule.title }}<br>
+                            {{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }} ({{ schedule.location }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>오늘 예정된 담당 아이돌 스케줄이 없습니다.</p>
             {% endif %}
 
             <hr>
@@ -106,6 +172,7 @@
 
         {% else %}
             <p>관리하는 아이돌이 없습니다.</p>
+            <p><a href="/test/manager_mainboard/">오늘의 스케줄 보기</a></p>
         {% endif %}
 
     {% elif user.role == 'ADMIN' %}

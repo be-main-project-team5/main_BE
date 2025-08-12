@@ -3,16 +3,14 @@
 {% if user.is_authenticated %}
     <h2>스케줄 목록</h2>
     <ul>
-        {% for schedule in idol.schedules.all %}
+        {% for schedule in schedules %}
             <li>
                 {{ schedule.title }} ({{ schedule.start_time }} ~ {{ schedule.end_time }})
-                <form method="post" action="/test/add_user_schedule/{{ schedule.id }}/" style="display:inline;">
+                <button type="button" class="add-schedule-button" data-schedule-id="{{ schedule.id }}" data-action="{% if schedule.is_added_to_user_schedule %}remove{% else %}add{% endif %}">
+                    {% if schedule.is_added_to_user_schedule %}내 스케줄에서 제거{% else %}내 스케줄에 추가{% endif %}
+                </button>
+                <form class="add-schedule-form" method="post" action="/test/add_user_schedule/{{ schedule.id }}/" style="display:none;">
                     {% csrf_token %}
-                    {% if schedule.is_added_to_user_schedule %}
-                        <button type="submit" name="action" value="remove">내 스케줄에서 제거</button>
-                    {% else %}
-                        <button type="submit" name="action" value="add">내 스케줄에 추가</button>
-                    {% endif %}
                 </form>
             </li>
         {% empty %}
@@ -25,3 +23,53 @@
 
 <p><a href="/test/idols/">아이돌 목록으로 돌아가기</a></p>
 <p><a href="/test/">메인으로 돌아가기</a></p>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addScheduleButtons = document.querySelectorAll('.add-schedule-button');
+
+    addScheduleButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default button click behavior
+
+            const scheduleId = this.dataset.scheduleId;
+            let action = this.dataset.action;
+            const url = `/test/add_user_schedule/${scheduleId}/`;
+            const form = this.nextElementSibling; // Get the hidden form
+            const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.action === 'added') {
+                        button.textContent = '내 스케줄에서 제거';
+                        button.dataset.action = 'remove';
+                    } else if (data.action === 'removed') {
+                        button.textContent = '내 스케줄에 추가';
+                        button.dataset.action = 'add';
+                    }
+                    console.log('User schedule action successful:', data);
+                } else {
+                    alert('오류: ' + data.message);
+                    console.error('User schedule action failed:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            });
+        });
+    });
+});
+</script>

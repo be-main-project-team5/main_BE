@@ -25,6 +25,10 @@ urlpatterns = [
         name="add_user_schedule",
     ),
     path("my_schedules/", views.my_schedules_view, name="my_schedules"),
+    path("remove_user_schedule/<int:user_schedule_id>/", views.remove_user_schedule_view, name="remove_user_schedule"),
     path("manager_schedule_test/", views.manager_schedule_test_view, name="manager_schedule_test"),
     path("add_schedule/", views.add_schedule_view, name="add_schedule"),
+    path("idol_mainboard/", views.idol_mainboard_view, name="idol_mainboard"),
+    path("manager_mainboard/", views.manager_mainboard_view, name="manager_mainboard"),
+    path("fan_favorites/", views.fan_favorites_view, name="fan_favorites"),
 ]

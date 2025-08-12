@@ -1,11 +1,36 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone # Added for manager_mainboard_view
+import requests # Added for API calls
+import json # Added for JSON handling
 
 from apps.bookmarks.models import GroupBookmark, IdolBookmark
 from apps.groups.models import Group
 from apps.idols.models import Idol, IdolManager
 from apps.schedules.models import IdolSchedule, GroupSchedule, UserSchedule # IdolSchedule과 UserSchedule의 새로운 경로
 from apps.users.models import Image
+
+
+# Helper function to make authenticated API calls
+def get_api_data(request, url):
+    access_token = request.session.get('access_token')
+    if not access_token:
+        print("Access token is missing in session.")
+        return None # Or redirect to login
+
+    print(f"Using access token: {access_token[:10]}...") # Print first 10 chars for debugging
+
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"API call failed: {e}")
+        return None
 
 
 def main(request):
@@ -19,22 +44,64 @@ def main(request):
             context["user_profile_image_url"] = request.user.profile_image.image_file.url
 
         if request.user.role == 'NORMAL':
+            # Call the Fan Mainboard API to get today's schedules
+            api_url = request.build_absolute_uri('/api/v1/users/mainboard/')
+            fan_mainboard_data = get_api_data(request, api_url)
+            context['fan_mainboard_schedules'] = fan_mainboard_data
+
+            # Re-add bookmarked idols and groups for display
             context["bookmarked_idols"] = IdolBookmark.objects.filter(
                 user=request.user
             ).select_related("idol")
             context["bookmarked_groups"] = GroupBookmark.objects.filter(
                 user=request.user
             ).select_related("group")
-            context["user_schedules"] = UserSchedule.objects.filter(user=request.user).select_related('idol_schedule__idol', 'group_schedule__group')
+
+            bookmarked_idols_ids = IdolBookmark.objects.filter(user=request.user).values_list('idol_id', flat=True)
+            bookmarked_group_ids = GroupBookmark.objects.filter(user=request.user).values_list('group_id', flat=True)
+
+            all_bookmarked_schedules = []
+
+            # Fetch Idol Schedules for bookmarked idols
+            idol_schedules = IdolSchedule.objects.filter(idol__id__in=bookmarked_idols_ids).order_by('start_time')
+            for schedule in idol_schedules:
+                all_bookmarked_schedules.append({
+                    'type': 'idol',
+                    'schedule': schedule
+                })
+
+            # Fetch Group Schedules for bookmarked groups
+            group_schedules = GroupSchedule.objects.filter(group__id__in=bookmarked_group_ids).order_by('start_time')
+            for schedule in group_schedules:
+                all_bookmarked_schedules.append({
+                    'type': 'group',
+                    'schedule': schedule
+                })
+
+            # Sort all schedules by start_time
+            all_bookmarked_schedules.sort(key=lambda x: x['schedule'].start_time)
+
+            context['all_bookmarked_schedules'] = all_bookmarked_schedules
+
+            
 
         elif request.user.role == 'IDOL':
+            # Fetch today's schedules for Idol Mainboard
+            api_url_today = request.build_absolute_uri('/api/v1/idols/mainboard/')
+            idol_mainboard_today_data = get_api_data(request, api_url_today)
+            context['idol_mainboard_schedules'] = idol_mainboard_today_data
+
+            # Debugging print statement
+            print(f"Idol Mainboard Today Schedules: {idol_mainboard_today_data}")
+
             try:
                 idol_instance = Idol.objects.get(user=request.user)
-                context["my_idol_info"] = idol_instance
-                context["my_idol_schedules"] = IdolSchedule.objects.filter(idol=idol_instance).order_by('start_time')
+                context["my_idol_info"] = idol_instance # Keep idol info
+                # Fetch ALL schedules for this idol
+                context["idol_all_schedules"] = IdolSchedule.objects.filter(idol=idol_instance).order_by('start_time')
             except Idol.DoesNotExist:
                 context["my_idol_info"] = None
-                context["my_idol_schedules"] = []
+                context["idol_all_schedules"] = []
 
         elif request.user.role == 'MANAGER':
             managed_idols = IdolManager.objects.filter(user=request.user).select_related('idol')
@@ -44,6 +111,15 @@ def main(request):
                 schedules = IdolSchedule.objects.filter(idol=manager_entry.idol).order_by('start_time')
                 managed_idol_schedules.extend(schedules)
             context["managed_idol_schedules"] = managed_idol_schedules
+
+            # Fetch today's schedules for managed idols
+            managed_idol_ids = [manager_entry.idol.id for manager_entry in managed_idols]
+            today = timezone.now().date()
+            today_schedules = IdolSchedule.objects.filter(
+                idol__id__in=managed_idol_ids,
+                start_time__date=today
+            ).order_by('start_time')
+            context['today_managed_schedules'] = today_schedules
 
         elif request.user.role == 'ADMIN':
             context["total_users"] = get_user_model().objects.count()
@@ -104,6 +180,23 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
+            # Make an API call to get JWT tokens
+            api_login_url = request.build_absolute_uri('/api/v1/users/login/')
+            try:
+                response = requests.post(api_login_url, json={'email': email, 'password': password})
+                response.raise_for_status()
+                tokens = response.json()
+                request.session['access_token'] = tokens.get('access_token')
+                request.session['refresh_token'] = tokens.get('refresh_token')
+            except requests.exceptions.RequestException as e:
+                print(f"API login failed: {e}")
+                # Handle API login failure, maybe clear session or show error
+                logout(request) # Log out Django session if API login fails
+                return render(
+                    request,
+                    "test_app/login.html",
+                    {"error": "API 로그인에 실패했습니다. 다시 시도해주세요."},
+                )
             return redirect("/test/")
         else:
             return render(
@@ -115,6 +208,22 @@ def login_view(request):
 
 
 def logout_view(request):
+    # Optionally, call the backend logout API to blacklist the refresh token
+    if 'refresh_token' in request.session:
+        api_logout_url = request.build_absolute_uri('/api/v1/users/logout/')
+        headers = {
+            'Authorization': f'Bearer {request.session.get("access_token")}',
+            'Content-Type': 'application/json'
+        }
+        try:
+            # Django REST SimpleJWT logout expects refresh token in body or cookie
+            # For simplicity in test_app, we'll send it in body if not using cookies
+            requests.post(api_logout_url, json={'refresh': request.session['refresh_token']}, headers=headers)
+        except requests.exceptions.RequestException as e:
+            print(f"API logout failed: {e}")
+        finally:
+            del request.session['access_token']
+            del request.session['refresh_token']
     logout(request)
     return redirect("/test/")
 
@@ -146,14 +255,19 @@ def idol_list_view(request):
     if not request.user.is_authenticated:
         return redirect("/test/login/")
 
-    idols = Idol.objects.all()
+    search_query = request.GET.get('search', '')
+    if search_query:
+        idols = Idol.objects.filter(name__icontains=search_query)
+    else:
+        idols = Idol.objects.all()
+
     for idol in idols:
         idol.is_bookmarked = IdolBookmark.objects.filter(
             user=request.user, idol=idol
         ).exists()
 
     return render(
-        request, "test_app/idol_list.html", {"idols": idols, "user": request.user}
+        request, "test_app/idol_list.html", {"idols": idols, "user": request.user, "search_query": search_query}
     )
 
 
@@ -174,32 +288,40 @@ def group_list_view(request):
 
 def bookmark_idol_view(request, idol_id):
     if not request.user.is_authenticated:
-        return redirect("/test/login/")
+        return JsonResponse({'status': 'error', 'message': '로그인이 필요합니다.'}, status=401)
 
-    idol = get_object_or_404(Idol, id=idol_id)
-    action = request.POST.get("action")
+    if request.method == 'POST':
+        idol = get_object_or_404(Idol, id=idol_id)
+        action = request.POST.get("action")
 
-    if action == "add":
-        IdolBookmark.objects.get_or_create(user=request.user, idol=idol)
-    elif action == "remove":
-        IdolBookmark.objects.filter(user=request.user, idol=idol).delete()
-
-    return redirect("/test/idols/")
+        if action == "add":
+            IdolBookmark.objects.get_or_create(user=request.user, idol=idol)
+            return JsonResponse({'status': 'success', 'action': 'added', 'idol_id': idol_id})
+        elif action == "remove":
+            IdolBookmark.objects.filter(user=request.user, idol=idol).delete()
+            return JsonResponse({'status': 'success', 'action': 'removed', 'idol_id': idol_id})
+        else:
+            return JsonResponse({'status': 'error', 'message': '유효하지 않은 액션입니다.'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'POST 요청만 허용됩니다.'}, status=405)
 
 
 def bookmark_group_view(request, group_id):
     if not request.user.is_authenticated:
-        return redirect("/test/login/")
+        return JsonResponse({'status': 'error', 'message': '로그인이 필요합니다.'}, status=401)
 
-    group = get_object_or_404(Group, id=group_id)
-    action = request.POST.get("action")
+    if request.method == 'POST':
+        group = get_object_or_404(Group, id=group_id)
+        action = request.POST.get("action")
 
-    if action == "add":
-        GroupBookmark.objects.get_or_create(user=request.user, group=group)
-    elif action == "remove":
-        GroupBookmark.objects.filter(user=request.user, group=group).delete()
-
-    return redirect("/test/groups/")
+        if action == "add":
+            GroupBookmark.objects.get_or_create(user=request.user, group=group)
+            return JsonResponse({'status': 'success', 'action': 'added', 'group_id': group_id})
+        elif action == "remove":
+            GroupBookmark.objects.filter(user=request.user, group=group).delete()
+            return JsonResponse({'status': 'success', 'action': 'removed', 'group_id': group_id})
+        else:
+            return JsonResponse({'status': 'error', 'message': '유효하지 않은 액션입니다.'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'POST 요청만 허용됩니다.'}, status=405)
 
 
 def idol_detail_view(request, idol_id):
@@ -215,25 +337,29 @@ def idol_detail_view(request, idol_id):
         ).exists()
 
     return render(
-        request, "test_app/idol_detail.html", {"idol": idol, "user": request.user}
+        request, "test_app/idol_detail.html", {"idol": idol, "user": request.user, "schedules": schedules}
     )
 
 
 def add_user_schedule_view(request, schedule_id):
     if not request.user.is_authenticated:
-        return redirect("/test/login/")
+        return JsonResponse({'status': 'error', 'message': '로그인이 필요합니다.'}, status=401)
 
-    schedule = get_object_or_404(IdolSchedule, id=schedule_id)
-    action = request.POST.get("action")
+    if request.method == 'POST':
+        schedule = get_object_or_404(IdolSchedule, id=schedule_id)
+        action = request.POST.get("action")
 
-    if action == "add":
-        UserSchedule.objects.get_or_create(user=request.user, idol_schedule=schedule)
-    elif action == "remove":
-        UserSchedule.objects.filter(user=request.user, idol_schedule=schedule).delete()
+        if action == "add":
+            UserSchedule.objects.get_or_create(user=request.user, idol_schedule=schedule)
+            return JsonResponse({'status': 'success', 'action': 'added', 'schedule_id': schedule_id})
+        elif action == "remove":
+            UserSchedule.objects.filter(user=request.user, idol_schedule=schedule).delete()
+            return JsonResponse({'status': 'success', 'action': 'removed', 'schedule_id': schedule_id})
+        else:
+            return JsonResponse({'status': 'error', 'message': '유효하지 않은 액션입니다.'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'POST 요청만 허용됩니다.'}, status=405)
 
-    return redirect("/test/idols/" + str(schedule.idol.id) + "/")
-
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 
 def add_schedule_view(request):
     if not request.user.is_authenticated or request.user.role != 'MANAGER':
@@ -388,3 +514,76 @@ def manager_schedule_test_view(request):
             test_results.append(f"스케줄 삭제 실패: {delete_response.status_code} - {delete_response.data}")
 
     return render(request, "test_app/manager_schedule_test.html", {"test_results": test_results})
+
+def remove_user_schedule_view(request, user_schedule_id):
+    if not request.user.is_authenticated:
+        return redirect("/test/login/")
+
+    user_schedule = get_object_or_404(UserSchedule, id=user_schedule_id, user=request.user)
+    user_schedule.delete()
+
+    return redirect("/test/")
+
+
+def fan_favorites_view(request):
+    if not request.user.is_authenticated or request.user.role != 'NORMAL':
+        return redirect("/test/login/")
+
+    # Fetch bookmarked idol schedules
+    bookmarked_idols_ids = IdolBookmark.objects.filter(user=request.user).values_list('idol_id', flat=True)
+    bookmarked_idol_schedules = IdolSchedule.objects.filter(idol__id__in=bookmarked_idols_ids).order_by('start_time')
+
+    # Fetch bookmarked group schedules
+    bookmarked_groups_ids = GroupBookmark.objects.filter(user=request.user).values_list('group_id', flat=True)
+    bookmarked_group_schedules = GroupSchedule.objects.filter(group__id__in=bookmarked_groups_ids).order_by('start_time')
+
+    # Fetch user's personal schedules
+    user_personal_schedules = UserSchedule.objects.filter(user=request.user).select_related('idol_schedule__idol', 'group_schedule__group').order_by('added_at')
+
+    context = {
+        'bookmarked_idol_schedules': bookmarked_idol_schedules,
+        'bookmarked_group_schedules': bookmarked_group_schedules,
+        'user_personal_schedules': user_personal_schedules,
+        'user': request.user,
+    }
+    return render(request, "test_app/fan_favorites.html", context)
+
+
+def idol_mainboard_view(request):
+    if not request.user.is_authenticated or request.user.role != 'IDOL':
+        return redirect("/test/login/")
+
+    api_url = request.build_absolute_uri('/api/v1/idols/mainboard/')
+    schedules = get_api_data(request, api_url)
+
+    return render(request, "test_app/idol_mainboard.html", {"user": request.user, "schedules": schedules})
+
+
+def manager_mainboard_view(request):
+    if not request.user.is_authenticated or request.user.role != 'MANAGER':
+        return redirect("/test/login/")
+
+    managed_idols = IdolManager.objects.filter(user=request.user).select_related('idol')
+    managed_idol_ids = [manager_entry.idol.id for manager_entry in managed_idols]
+
+    today = timezone.now().date()
+
+    # Fetch today's schedules for managed idols
+    today_schedules = IdolSchedule.objects.filter(
+        idol__id__in=managed_idol_ids,
+        start_time__date=today
+    ).order_by('start_time')
+
+    # Fetch all schedules for managed idols
+    all_schedules = IdolSchedule.objects.filter(
+        idol__id__in=managed_idol_ids
+    ).order_by('start_time')
+
+    context = {
+        "user": request.user,
+        "managed_idols": managed_idols, # Keep this for other potential uses in template
+        "today_schedules": today_schedules,
+        "all_schedules": all_schedules,
+    }
+
+    return render(request, "test_app/manager_mainboard.html", context)
