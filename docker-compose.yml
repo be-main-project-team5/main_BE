@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Redis 서비스
+  redis:
+    image: redis:7-alpine
+    container_name: main_be_redis
+    ports:
+      - "6380:6379" # settings.py의 포트(6380)와 맞춤
+    command: redis-server --port 6379
+
+  # Django 애플리케이션 서비스
+  web:
+    build: .
+    container_name: main_be_web
+    # Gunicorn 실행 명령어
+    command: gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # 개발 시 코드 변경을 즉시 반영하기 위해 사용 (프로덕션에서는 제거 가능)
+      - ./media:/app/media # 미디어 파일 볼륨 마운트
+    environment:
+      # settings.py에서 사용하는 환경 변수를 여기에 설정합니다.
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_HOST=db # docker-compose 내부의 db 서비스를 가리킴
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      # Channel Layer가 사용할 Redis 호스트 (docker-compose 내부의 redis 서비스를 가리킴)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis # redis 서비스가 먼저 실행되도록 설정
+      - db    # db 서비스가 먼저 실행되도록 설정
+
+  # PostgreSQL 데이터베이스 서비스
+  db:
+    image: postgres:15-alpine
+    container_name: main_be_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:

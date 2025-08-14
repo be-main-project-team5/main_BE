@@ -22,6 +22,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 채널 레이어 그룹 이름을 정의합니다 (예: 'chat_1').
         self.room_group_name = f"chat_{self.room_name}"
 
+        # 인증되지 않은 사용자는 연결을 거부합니다.
+        if not self.scope["user"].is_authenticated:
+            await self.close()
+            return
+
         # 채널 레이어의 그룹에 현재 채널을 추가합니다.
         # 이렇게 하면 같은 그룹에 속한 모든 채널에 메시지를 보낼 수 있습니다.
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
