@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "channels",  # Channels 앱 추가
     "apps.users",
     "apps.groups",
     "apps.idols",
@@ -61,7 +62,13 @@ THIRD_PARTY_APPS = [
     "apps.test_app.apps.TestAppConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = (
+    [
+        "daphne",
+    ]
+    + DJANGO_APPS
+    + THIRD_PARTY_APPS
+)
 
 
 MIDDLEWARE = [
@@ -92,6 +99,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"  # ASGI 애플리케이션 설정
 
 
 # Database
@@ -226,4 +234,14 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,  # 스키마를 API 엔드포인트로 제공할지 여부
     "COMPONENT_SPLIT_REQUEST": True,  # 컴포넌트를 별도의 요청으로 분할하여 로딩 속도 개선
     # 기타 필요한 설정 추가 가능
+}
+
+# Channel Layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_HOST", "127.0.0.1"), int(os.getenv("REDIS_PORT", 6380)))],
+        },
+    },
 }
