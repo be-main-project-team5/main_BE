@@ -2,6 +2,8 @@ from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny  # AllowAny를 임포트합니다.
 
+from apps.idols.models import Idol, IdolManager  # 권한 체크 위해 추가
+
 from .models import Group, GroupSchedule
 from .serializers import GroupScheduleSerializer, GroupSerializer
 
@@ -49,4 +51,20 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
         """
         group_pk = self.kwargs.get("group_pk")
         group = get_object_or_404(Group, pk=group_pk)
+
+        # 이 그룹에 속한 아이돌 목록 가져오기
+        idols_in_group = Idol.objects.filter(group=group)
+
+        # 현재 유저가 이 중 한 아이돌의 매니저인지 확인
+        is_manager = IdolManager.objects.filter(
+            user=self.request.user, idol__in=idols_in_group
+        ).exists()
+
+        if not is_manager:
+            # 권한 없으면 예외 발생
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied("이 그룹의 스케줄 등록 권한이 없습니다.")
+
+        # 권한 통과 시 저장
         serializer.save(group=group)
