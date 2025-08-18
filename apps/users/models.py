@@ -5,8 +5,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.files.storage import default_storage
 from django.db import models
 
-from apps.idols.models import IdolSchedule
-
 
 # Image 모델 정의 (프로필 이미지, 로고 이미지 등에 사용) / 나중에 common 앱으로 이동할 수 있다.
 class Image(models.Model):
@@ -37,14 +35,6 @@ class Image(models.Model):
             self.url = settings.MEDIA_URL + file_name
             self.file_size = self.image_file.size
         super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        # 모델 인스턴스가 삭제될 때 연결된 파일도 삭제합니다.
-        if self.image_file:
-            self.image_file.delete(
-                save=False
-            )  # save=False는 모델의 save 메서드를 다시 호출하지 않도록 합니다.
-        super().delete(*args, **kwargs)
 
     def __str__(self):
         # 객체를 문자열로 표현할 때 이미지 URL을 반환합니다.
@@ -115,6 +105,10 @@ class CustomUser(AbstractUser):
         max_length=10, choices=ROLE_CHOICES, default="NORMAL", null=False, blank=False
     )
 
+    # 소셜 로그인 정보
+    social_provider = models.CharField(max_length=30, blank=True, null=True)
+    social_id = models.CharField(max_length=255, blank=True, null=True)
+
     # is_superuser와 is_staff는 AbstractUser에 정의
     # is_superuser = models.BooleanField(default=False)
     # is_staff = models.BooleanField(default=False)
@@ -137,51 +131,8 @@ class CustomUser(AbstractUser):
         db_table = "users"
         # Django 관리자 페이지에 표시될 이름을 설정합니다.
         verbose_name = "사용자"
-        verbose_name_plural = "사용자들"
+        verbose_name_plural = "사용자"
 
     def __str__(self):
         # 객체를 문자열로 표현할 때 이메일 주소를 반환합니다.
         return self.email
-
-
-# 사용자가 자신의 스케줄에 추가한 일정을 기록합니다.
-class UserSchedule(models.Model):
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        null=False,
-        blank=False,
-        related_name="my_schedules",
-    )
-    # 아이돌 스케줄 또는 그룹 스케줄 중 하나를 참조
-    idol_schedule = models.ForeignKey(
-        IdolSchedule,
-        on_delete=models.CASCADE,
-        null=True,  # 둘 중 하나는 null이 될 수 있음
-        blank=True,
-        related_name="user_added_schedules",
-    )
-    # group_schedule = models.ForeignKey(
-    #     GroupSchedule,
-    #     on_delete=models.CASCADE,
-    #     null=True, # 둘 중 하나는 null이 될 수 있음
-    #     blank=True,
-    #     related_name='user_added_schedules'
-    # )
-    added_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "user_schedules"
-        verbose_name = "사용자 스케줄"
-        verbose_name_plural = "사용자 스케줄들"
-        # 한 사용자가 동일한 아이돌 스케줄 또는 그룹 스케줄을 두 번 추가할 수 없도록
-        unique_together = (("user", "idol_schedule"),)
-
-    def __str__(self):
-        if self.idol_schedule:
-            return (
-                f"{self.user.email} - 아이돌 스케줄: {self.idol_schedule.description}"
-            )
-        # elif self.group_schedule:
-        #     return f"{self.user.email} - 그룹 스케줄: {self.group_schedule.description}"
-        return f"{self.user.email} - 스케줄 없음"
