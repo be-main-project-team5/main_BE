@@ -1,24 +1,29 @@
 from rest_framework import serializers
-from .models import IdolSchedule, GroupSchedule, UserSchedule
+
+from .models import GroupSchedule, IdolSchedule, UserSchedule
+
 
 class IdolScheduleSerializer(serializers.ModelSerializer):
-    manager = serializers.HiddenField(default=serializers.CurrentUserDefault()) # 현재 로그인한 사용자를 manager로 자동 설정
+    manager = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )  # 현재 로그인한 사용자를 manager로 자동 설정
 
     class Meta:
         model = IdolSchedule
-        fields = '__all__'
+        fields = "__all__"
         # read_only_fields = ('manager',) # HiddenField를 사용하므로 필요 없음
 
     def create(self, validated_data):
         # manager 필드는 HiddenField에서 자동으로 설정되므로, validated_data에 이미 포함되어 있음
         return super().create(validated_data)
 
+
 class GroupScheduleSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = GroupSchedule
-        fields = '__all__'
+        fields = "__all__"
 
 
 class UserScheduleCreateSerializer(serializers.ModelSerializer):
@@ -30,7 +35,10 @@ class UserScheduleCreateSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     group_schedule_id = serializers.PrimaryKeyRelatedField(
-        queryset=GroupSchedule.objects.all(), source='group_schedule', required=False, allow_null=True
+        queryset=GroupSchedule.objects.all(),
+        source="group_schedule",
+        required=False,
+        allow_null=True,
     )
 
     class Meta:

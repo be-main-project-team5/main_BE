@@ -66,6 +66,3 @@ class GroupSerializer(ImageUpdateSerializerMixin, serializers.ModelSerializer):
 
         instance.save()
         return instance
-
-
-

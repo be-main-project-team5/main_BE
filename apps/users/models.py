@@ -36,8 +36,6 @@ class Image(models.Model):
             self.file_size = self.image_file.size
         super().save(*args, **kwargs)
 
-    
-
     def __str__(self):
         # 객체를 문자열로 표현할 때 이미지 URL을 반환합니다.
         return self.url if self.url else "No Image"

@@ -52,21 +52,26 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "channels",  # Channels 앱 추가
     "apps.users",
     "apps.groups",
     "apps.idols",
     "apps.chats",
     "apps.bookmarks",
     "apps.alarms",
-    "apps.test_app.apps.TestAppConfig",
     "apps.schedules",
     "apps.admins.apps.AdminsConfig",
     "django_cleanup.apps.CleanupConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + [
-    "django_filters", # 추가
-]
+INSTALLED_APPS = (
+    [
+        "daphne",
+    ]
+    + DJANGO_APPS
+    + THIRD_PARTY_APPS
+    + ["django_filters"]
+)
 
 
 MIDDLEWARE = [
@@ -97,6 +102,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"  # ASGI 애플리케이션 설정
 
 
 # Database
@@ -176,7 +182,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 REST_FRAMEWORK = {
@@ -245,3 +251,18 @@ KAKAO_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/kakao/callback/"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/google/callback/"
+
+# Channel Layers
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    os.getenv("REDIS_HOST", "127.0.0.1"),
+                    int(os.getenv("REDIS_PORT", 6380)),
+                )
+            ],
+        },
+    },
+}

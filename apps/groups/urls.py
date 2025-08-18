@@ -1,7 +1,6 @@
 from rest_framework_nested import routers
 
 from .views import GroupViewSet
-from rest_framework.routers import DefaultRouter
 
 # 'groups'라는 기본 경로(prefix)에 GroupViewSet을 등록합니다.
 # 이렇게 등록하면 다음과 같은 URL 패턴이 자동으로 생성됩니다:

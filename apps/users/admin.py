@@ -3,8 +3,9 @@ from django.contrib import admin
 from django.db import transaction
 from django.utils.html import format_html
 
+from apps.idols.models import Idol  # Idol 모델 임포트
+
 from .models import CustomUser, Image
-from apps.idols.models import Idol # Idol 모델 임포트
 
 
 # Custom form for CustomUserAdmin to handle image upload
@@ -34,7 +35,9 @@ class CustomUserAdminForm(forms.ModelForm):
         pass
 
     def save(self, commit=True):
-        user = super().save(commit=False) # user 인스턴스를 가져오지만 아직 저장하지 않음
+        user = super().save(
+            commit=False
+        )  # user 인스턴스를 가져오지만 아직 저장하지 않음
 
         # 비밀번호가 변경되었을 경우에만 set_password를 호출
         if self.cleaned_data.get("password"):
@@ -110,8 +113,10 @@ class CustomUserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # If the user's role is 'IDOL' and no Idol instance exists for this user, create one
-        if obj.role == 'IDOL':
-            if not hasattr(obj, 'idol'): # Check if an Idol instance already exists for this user
+        if obj.role == "IDOL":
+            if not hasattr(
+                obj, "idol"
+            ):  # Check if an Idol instance already exists for this user
                 Idol.objects.create(user=obj, name=obj.nickname, group=None)
 
 

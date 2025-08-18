@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+
 from apps.common.permissions import IsManagerOrAdminOrReadOnly
 
 from .models import Group
@@ -21,6 +22,3 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
     permission_classes = [IsManagerOrAdminOrReadOnly]
-
-
-

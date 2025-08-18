@@ -1,7 +1,9 @@
-from django.db import models
 from django.conf import settings
-from apps.idols.models import Idol
+from django.db import models
+
 from apps.groups.models import Group
+from apps.idols.models import Idol
+
 
 class IdolSchedule(models.Model):
     idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="schedules")
@@ -84,9 +86,9 @@ class UserSchedule(models.Model):
     group_schedule = models.ForeignKey(
         GroupSchedule,
         on_delete=models.CASCADE,
-        null=True, # 둘 중 하나는 null이 될 수 있음
+        null=True,  # 둘 중 하나는 null이 될 수 있음
         blank=True,
-        related_name='user_added_schedules'
+        related_name="user_added_schedules",
     )
     added_at = models.DateTimeField(auto_now_add=True)
 

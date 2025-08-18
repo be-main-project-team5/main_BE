@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 from apps.users.models import Image  # Image 모델 임포트
 
@@ -28,7 +27,7 @@ class Group(models.Model):
         null=True,  # 매니저가 없을 수도 있습니다.
         blank=True,
         related_name="managed_groups",  # 역참조 이름 설정
-        help_text="그룹 담당 매니저"
+        help_text="그룹 담당 매니저",
     )
 
     # 그룹 로고 이미지 ID (Image 모델의 ForeignKey)

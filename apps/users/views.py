@@ -2,9 +2,7 @@ from datetime import date
 
 import requests
 from django.conf import settings
-from django.contrib.auth import login
 from django.db import transaction
-from django.shortcuts import redirect
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -16,11 +14,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.bookmarks.models import GroupBookmark, IdolBookmark
 from apps.schedules.models import GroupSchedule, IdolSchedule, UserSchedule
+
 from .models import CustomUser
 from .serializers import (
     FanMainboardSerializer,
     PasswordChangeSerializer,
-    UserDeleteSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     UserSignupSerializer,
@@ -171,9 +169,7 @@ class MyPageView(generics.RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(
-                instance, data=request.data, partial=True
-            )
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
@@ -196,7 +192,7 @@ class MyPageView(generics.RetrieveUpdateDestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            password = request.data.get('password')
+            password = request.data.get("password")
             if not password:
                 raise ValidationError({"password": "비밀번호를 입력해주세요."})
 
@@ -295,10 +291,10 @@ class FanMainboardView(APIView):
 
         user_schedules = UserSchedule.objects.filter(
             user=user, idol_schedule__start_time__date=today
-        ).select_related('idol_schedule')
+        ).select_related("idol_schedule")
         user_group_schedules = UserSchedule.objects.filter(
             user=user, group_schedule__start_time__date=today
-        ).select_related('group_schedule')
+        ).select_related("group_schedule")
 
         all_schedules = list(idol_schedules) + list(group_schedules)
         all_schedules += [us.idol_schedule for us in user_schedules if us.idol_schedule]
@@ -319,7 +315,10 @@ class KakaoCallbackView(APIView):
         try:
             code = request.GET.get("code")
             if not code:
-                return Response({"error": "Authorization code not provided."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Authorization code not provided."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             token_response = requests.post(
                 "https://kauth.kakao.com/oauth/token",
@@ -329,20 +328,28 @@ class KakaoCallbackView(APIView):
                     "redirect_uri": settings.KAKAO_REDIRECT_URI,
                     "code": code,
                 },
-                headers={"Content-type": "application/x-www-form-urlencoded;charset=utf-8"},
-                timeout=5
+                headers={
+                    "Content-type": "application/x-www-form-urlencoded;charset=utf-8"
+                },
+                timeout=5,
             )
 
             token_json = token_response.json()
             if "error" in token_json:
                 return Response(
-                    {"error": token_json["error"], "error_description": token_json.get("error_description")},
+                    {
+                        "error": token_json["error"],
+                        "error_description": token_json.get("error_description"),
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             access_token = token_json.get("access_token")
             if not access_token:
-                return Response({"error": "Failed to retrieve access token."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Failed to retrieve access token."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             user_info_response = requests.get(
                 "https://kapi.kakao.com/v2/user/me",
@@ -350,7 +357,7 @@ class KakaoCallbackView(APIView):
                     "Authorization": f"Bearer {access_token}",
                     "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
                 },
-                timeout=5
+                timeout=5,
             )
             user_info = user_info_response.json()
 
@@ -361,7 +368,10 @@ class KakaoCallbackView(APIView):
                 email = f"{kakao_id}@kakao.user"
 
             if not kakao_id:
-                return Response({"error": "Failed to get user information from Kakao."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Failed to get user information from Kakao."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             user, created = CustomUser.objects.get_or_create(
                 social_id=str(kakao_id),
@@ -380,11 +390,17 @@ class KakaoCallbackView(APIView):
             return Response(tokens, status=status.HTTP_200_OK)
 
         except requests.Timeout:
-            return Response({"error": "External service timeout."}, status=status.HTTP_504_GATEWAY_TIMEOUT)
+            return Response(
+                {"error": "External service timeout."},
+                status=status.HTTP_504_GATEWAY_TIMEOUT,
+            )
         except Exception as e:
             import traceback
+
             traceback.print_exc()
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class GoogleCallbackView(APIView):
@@ -458,6 +474,8 @@ class GoogleCallbackView(APIView):
 
         except Exception as e:
             import traceback
-            traceback.print_exc()
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

@@ -1,15 +1,15 @@
-from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.files.storage import default_storage
 from rest_framework import serializers
 
+from apps.common.mixins import ImageUpdateSerializerMixin
+from apps.schedules.models import GroupSchedule, IdolSchedule
 from apps.schedules.serializers import (
     GroupScheduleSerializer,
     IdolScheduleSerializer,
 )
-from apps.schedules.models import GroupSchedule, IdolSchedule
+
 from .models import CustomUser, Image
 
 
@@ -103,7 +103,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 # 사용자 프로필 조회 및 수정
-from apps.common.mixins import ImageUpdateSerializerMixin
 
 
 class UserProfileSerializer(ImageUpdateSerializerMixin, serializers.ModelSerializer):
@@ -206,9 +205,9 @@ class FanMainboardSerializer(serializers.Serializer):
 
     def get_schedule_type(self, obj):
         if isinstance(obj, IdolSchedule):
-            return 'idol_schedule'
+            return "idol_schedule"
         elif isinstance(obj, GroupSchedule):
-            return 'group_schedule'
+            return "group_schedule"
         return None
 
     def get_schedule(self, obj):

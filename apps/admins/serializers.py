@@ -1,5 +1,6 @@
-
 from rest_framework import serializers
+
+from apps.idols.models import Idol, IdolManager
 from apps.users.models import CustomUser
 
 
@@ -34,15 +35,11 @@ class ManagerCreateSerializer(BaseUserCreateSerializer):
 
     def create(self, validated_data):
         # create_user를 오버라이드하는 대신, validated_data에 역할 정보를 추가합니다.
-        validated_data['role'] = 'MANAGER'
-        validated_data['is_staff'] = True
+        validated_data["role"] = "MANAGER"
+        validated_data["is_staff"] = True
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
-
-from apps.idols.models import IdolManager
-
-from apps.idols.models import Idol
 
 class IdolCreateSerializer(BaseUserCreateSerializer):
     """아이돌 계정 생성을 위한 시리얼라이저"""
@@ -52,12 +49,13 @@ class IdolCreateSerializer(BaseUserCreateSerializer):
         user.role = "IDOL"
         user.save()
         # 아이돌 객체 생성 추가
-        Idol.objects.create(user=user, name=validated_data.get('nickname'))
+        Idol.objects.create(user=user, name=validated_data.get("nickname"))
         return user
 
 
 class IdolManagerCreateSerializer(serializers.ModelSerializer):
     """매니저-아이돌 관계 생성을 위한 시리얼라이저"""
+
     class Meta:
         model = IdolManager
-        fields = ['user', 'idol'] # user는 매니저, idol은 아이돌
+        fields = ["user", "idol"]  # user는 매니저, idol은 아이돌

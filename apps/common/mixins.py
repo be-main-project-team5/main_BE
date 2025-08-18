@@ -1,6 +1,3 @@
-from django.conf import settings
-from django.core.files.storage import default_storage
-
 from apps.users.models import Image
 
 
@@ -26,15 +23,12 @@ class ImageUpdateSerializerMixin:
         image_file = validated_data.pop(image_field_name, None)
         request = self.context.get("request")
 
-        image_was_provided = (
-            image_file is not None
-            or (
-                request
-                and image_field_name in request.data
-                and (
-                    request.data[image_field_name] is None
-                    or request.data[image_field_name] == "null"
-                )
+        image_was_provided = image_file is not None or (
+            request
+            and image_field_name in request.data
+            and (
+                request.data[image_field_name] is None
+                or request.data[image_field_name] == "null"
             )
         )
 

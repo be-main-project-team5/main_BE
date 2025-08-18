@@ -1,10 +1,21 @@
-from rest_framework import viewsets, status
+from datetime import date
+
+from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import IdolSchedule, GroupSchedule
-from .serializers import IdolScheduleSerializer, GroupScheduleSerializer
+from rest_framework.views import APIView
+
+from apps.idols.models import IdolManager  # IdolManager 모델 임포트
 from apps.users.permissions import IsManagerOrAdmin
-from apps.idols.models import IdolManager # IdolManager 모델 임포트
+
+from .models import GroupSchedule, IdolSchedule, UserSchedule
+from .serializers import (
+    GroupScheduleSerializer,
+    IdolScheduleSerializer,
+    MyScheduleListSerializer,
+)
+
 
 class IdolScheduleViewSet(viewsets.ModelViewSet):
     queryset = IdolSchedule.objects.all()
@@ -13,16 +24,18 @@ class IdolScheduleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # 관리자는 모든 스케줄 조회 가능
-        if self.request.user.role == 'ADMIN':
+        if self.request.user.role == "ADMIN":
             return IdolSchedule.objects.all()
         # 매니저는 자신이 담당하는 아이돌의 스케줄만 조회 가능
-        elif self.request.user.role == 'MANAGER':
-            managed_idols = IdolManager.objects.filter(user=self.request.user).values_list('idol__id', flat=True)
+        elif self.request.user.role == "MANAGER":
+            managed_idols = IdolManager.objects.filter(
+                user=self.request.user
+            ).values_list("idol__id", flat=True)
             return IdolSchedule.objects.filter(idol__id__in=managed_idols)
         # 그 외 사용자 (아이돌 포함)는 자신의 아이돌 스케줄만 조회 가능
-        elif self.request.user.role == 'IDOL':
+        elif self.request.user.role == "IDOL":
             return IdolSchedule.objects.filter(idol__user=self.request.user)
-        return IdolSchedule.objects.none() # 권한 없는 경우 빈 쿼리셋 반환
+        return IdolSchedule.objects.none()  # 권한 없는 경우 빈 쿼리셋 반환
 
     def perform_create(self, serializer):
         # 스케줄 생성 시 현재 로그인한 사용자를 manager로 설정
@@ -31,6 +44,7 @@ class IdolScheduleViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         # 스케줄 수정 시 현재 로그인한 사용자를 manager로 설정 (선택 사항, 필요에 따라)
         serializer.save(manager=self.request.user)
+
 
 class GroupScheduleViewSet(viewsets.ModelViewSet):
     queryset = GroupSchedule.objects.all()
@@ -42,22 +56,20 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return GroupSchedule.objects.all()
         # 매니저는 자신이 담당하는 그룹의 스케줄만 조회 가능
-        elif self.request.user.role == 'MANAGER':
-            managed_group_ids = self.request.user.managed_groups.values_list('id', flat=True)
+        elif self.request.user.role == "MANAGER":
+            managed_group_ids = self.request.user.managed_groups.values_list(
+                "id", flat=True
+            )
             return GroupSchedule.objects.filter(group__id__in=managed_group_ids)
         return GroupSchedule.objects.none()
 
     def perform_create(self, serializer):
-        group = serializer.validated_data.get('group')
+        group = serializer.validated_data.get("group")
         # 요청한 사용자가 해당 그룹의 매니저인지 확인
         if not self.request.user.is_staff and group.manager != self.request.user:
             raise PermissionDenied("이 그룹의 스케줄을 생성할 권한이 없습니다.")
         serializer.save(author=self.request.user)
 
-
-from rest_framework.permissions import IsAuthenticated
-from .models import UserSchedule
-from .serializers import MyScheduleListSerializer
 
 class UserScheduleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = UserSchedule.objects.all()
@@ -76,9 +88,13 @@ class UserScheduleViewSet(viewsets.ReadOnlyModelViewSet):
 
         # IdolSchedule 또는 GroupSchedule의 상세 정보 추가
         if instance.idol_schedule:
-            data['schedule_details'] = IdolScheduleSerializer(instance.idol_schedule).data
+            data["schedule_details"] = IdolScheduleSerializer(
+                instance.idol_schedule
+            ).data
         elif instance.group_schedule:
-            data['schedule_details'] = GroupScheduleSerializer(instance.group_schedule).data
+            data["schedule_details"] = GroupScheduleSerializer(
+                instance.group_schedule
+            ).data
         return Response(data)
 
 
@@ -89,18 +105,22 @@ class ManagerScheduleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated and self.request.user.role == "MANAGER":
             # 현재 매니저가 담당하는 아이돌 목록을 가져옵니다.
-            managed_idols = IdolManager.objects.filter(user=self.request.user).values_list('idol', flat=True)
+            managed_idols = IdolManager.objects.filter(
+                user=self.request.user
+            ).values_list("idol", flat=True)
             # 담당 아이돌의 스케줄만 필터링합니다.
             return IdolSchedule.objects.filter(idol__in=managed_idols)
         return IdolSchedule.objects.none()
 
     def perform_create(self, serializer):
         # 스케줄 생성 시, 요청한 사용자가 담당하는 아이돌인지 확인
-        idol_id = self.request.data.get('idol')
+        idol_id = self.request.data.get("idol")
         if not idol_id:
             raise ValidationError({"idol": "This field is required."})
-        
-        managed_idols = IdolManager.objects.filter(user=self.request.user).values_list('idol__id', flat=True)
+
+        managed_idols = IdolManager.objects.filter(user=self.request.user).values_list(
+            "idol__id", flat=True
+        )
         if int(idol_id) not in managed_idols:
             raise PermissionDenied("이 아이돌의 스케줄을 생성할 권한이 없습니다.")
         serializer.save(manager=self.request.user)
@@ -116,27 +136,24 @@ class ManagerScheduleViewSet(viewsets.ModelViewSet):
         instance.delete()
 
 
-from rest_framework.views import APIView
-from datetime import date
-
-
 class ManagerMainboardView(APIView):
     permission_classes = [IsManagerOrAdmin]
 
     def get(self, request):
         user = request.user
-        if user.role != 'MANAGER':
+        if user.role != "MANAGER":
             return Response(
                 {"detail": "매니저만 접근할 수 있습니다."},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        managed_idols = IdolManager.objects.filter(user=user).values_list('idol__id', flat=True)
+        managed_idols = IdolManager.objects.filter(user=user).values_list(
+            "idol__id", flat=True
+        )
         today = date.today()
         schedules = IdolSchedule.objects.filter(
-            idol__id__in=managed_idols,
-            start_time__date=today
-        ).order_by('start_time')
+            idol__id__in=managed_idols, start_time__date=today
+        ).order_by("start_time")
 
         serializer = IdolScheduleSerializer(schedules, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
