@@ -27,7 +27,7 @@ class AlarmCreateView(APIView):
         """
         사용자 요청: idol_schedule_id 또는 group_schedule_id를 전달
         → 해당 스케줄의 시작 시간 기준으로 scheduled_time 설정
-        → 알람 생성
+        → 알람 생성 + Celery task 예약
         """
         user = request.user
         idol_schedule_id = request.data.get("idol_schedule_id")
