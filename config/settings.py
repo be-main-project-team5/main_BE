@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "django_celery_beat",
     "channels",  # Channels 앱 추가
     "apps.users",
     "apps.groups",
@@ -59,13 +60,24 @@ THIRD_PARTY_APPS = [
     "apps.chats",
     "apps.bookmarks",
     "apps.alarms",
-    "apps.test_app.apps.TestAppConfig",
+    "apps.schedules",
+    "apps.admins.apps.AdminsConfig",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 INSTALLED_APPS = (
     DJANGO_APPS
     + THIRD_PARTY_APPS
+    + ["django_filters"]
 )
+
+# 알람 발송을 1분 주기로 체크하기 위해 작성
+CELERY_BEAT_SCHEDULE = {
+    "send_scheduled_alarms": {
+        "task": "apps.alarms.tasks.send_scheduled_alarms",  # 실행할 Task 경로
+        "schedule": timedelta(minutes=1),  # 1분마다 실행
+    },
+}
 
 
 MIDDLEWARE = [
@@ -175,6 +187,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.CustomUser"
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -233,12 +249,34 @@ SPECTACULAR_SETTINGS = {
     # 기타 필요한 설정 추가 가능
 }
 
+
+# alarms test를 위한 Redis 브로커 설정
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # 로컬 Redis
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_TIMEZONE = "Asia/Seoul"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Kakao Social Login Settings
+KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
+KAKAO_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/kakao/callback/"
+
+# Google Social Login Settings
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/google/callback/"
+
 # Channel Layers
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(os.getenv("REDIS_HOST", "127.0.0.1"), int(os.getenv("REDIS_PORT", 6380)))],
+            "hosts": [
+                (
+                    os.getenv("REDIS_HOST", "127.0.0.1"),
+                    int(os.getenv("REDIS_PORT", 6380)),
+                )
+            ],
         },
     },
 }

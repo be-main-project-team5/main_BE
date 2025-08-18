@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import ChatMessage, ChatParticipant, ChatRoom
+from .models import ChatParticipant, ChatRoom
 from .serializers import ChatMessageSerializer, ChatRoomSerializer, UserSerializer
 
 # Django의 현재 활성화된 사용자 모델을 가져옵니다.

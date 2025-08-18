@@ -5,8 +5,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.groups.models import GroupSchedule
-from apps.idols.models import IdolSchedule
+from apps.schedules.models import GroupSchedule, IdolSchedule
 
 from .models import Alarm
 from .serializers import AlarmSerializer
@@ -28,7 +27,7 @@ class AlarmCreateView(APIView):
         """
         사용자 요청: idol_schedule_id 또는 group_schedule_id를 전달
         → 해당 스케줄의 시작 시간 기준으로 scheduled_time 설정
-        → 알람 생성
+        → 알람 생성 + Celery task 예약
         """
         user = request.user
         idol_schedule_id = request.data.get("idol_schedule_id")
