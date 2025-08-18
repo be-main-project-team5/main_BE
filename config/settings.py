@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "django_celery_beat",
     "apps.users",
     "apps.groups",
     "apps.idols",
@@ -62,6 +63,14 @@ THIRD_PARTY_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
+
+# 알람 발송을 1분 주기로 체크하기 위해 작성
+CELERY_BEAT_SCHEDULE = {
+    "send_scheduled_alarms": {
+        "task": "apps.alarms.tasks.send_scheduled_alarms",  # 실행할 Task 경로
+        "schedule": timedelta(minutes=1),  # 1분마다 실행
+    },
+}
 
 
 MIDDLEWARE = [
@@ -227,3 +236,10 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,  # 컴포넌트를 별도의 요청으로 분할하여 로딩 속도 개선
     # 기타 필요한 설정 추가 가능
 }
+
+# alarms test를 위한 Redis 브로커 설정
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # 로컬 Redis
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_TIMEZONE = "Asia/Seoul"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
