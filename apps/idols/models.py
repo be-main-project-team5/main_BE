@@ -3,18 +3,20 @@ from django.db import models
 
 
 class Idol(models.Model):
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
-    )  # 유저와 1대1이므로 원투원 필드 사용
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     group = models.ForeignKey(
         "groups.Group", on_delete=models.SET_NULL, null=True, blank=True
     )
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "아이돌"
+        verbose_name_plural = "아이돌"
 
 
 class IdolManager(models.Model):
@@ -26,29 +28,8 @@ class IdolManager(models.Model):
             "user",
             "idol",
         )  # 같은 매니저가 같은 아이돌에 중복 등록되지 않도록
+        verbose_name = "아이돌 매니저"
+        verbose_name_plural = "아이돌 매니저"
 
     def __str__(self):
         return f"{self.user.nickname} → {self.idol.name}"
-
-
-class IdolSchedule(models.Model):
-    idol = models.ForeignKey(Idol, on_delete=models.CASCADE, related_name="schedules")
-    manager = models.ForeignKey(  # 작성자
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="written_schedules",
-        help_text="이 스케줄을 작성한 아이돌 매니저",
-    )
-    title = models.CharField(max_length=100)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    location = models.CharField(max_length=5000)
-    description = models.CharField(max_length=5000)
-    is_public = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.idol.name} - {self.title}"

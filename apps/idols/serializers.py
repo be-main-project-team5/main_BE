@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Idol, IdolSchedule
+from .models import Idol
 
 
 class IdolSerializer(serializers.ModelSerializer):
@@ -9,17 +9,9 @@ class IdolSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class IdolScheduleSerializer(serializers.ModelSerializer):
+class IdolGroupSerializer(serializers.ModelSerializer):
+    """아이돌의 그룹 정보만 수정하기 위한 시리얼라이저"""
+
     class Meta:
-        model = IdolSchedule
-        # fields에 id, title, start_time, end_time, description, is_public, idol, manager를 명시합니다.
-        fields = [
-            "id",
-            "title",
-            "start_time",
-            "end_time",
-            "description",
-            "is_public",
-            "idol",
-        ]
-        read_only_fields = ["id", "idol"]
+        model = Idol
+        fields = ["group"]

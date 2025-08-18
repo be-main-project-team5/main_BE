@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class TestAppConfig(AppConfig):
+class SchedulesConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.test_app"
+    name = "apps.schedules"

@@ -32,7 +32,7 @@ class IdolBookmark(models.Model):
         db_table = "bookmarks_idolbookmark"
         # Django 관리자 페이지에 표시될 이름을 설정합니다。
         verbose_name = "아이돌 즐겨찾기"
-        verbose_name_plural = "아이돌 즐겨찾기들"
+        verbose_name_plural = "아이돌 즐겨찾기"
         # user와 idol 조합이 고유해야 합니다. (한 사용자가 같은 아이돌을 두 번 북마크할 수 없음)
         unique_together = ("user", "idol")
 
@@ -68,7 +68,7 @@ class GroupBookmark(models.Model):
         db_table = "bookmarks_groupbookmark"
         # Django 관리자 페이지에 표시될 이름을 설정합니다。
         verbose_name = "그룹 즐겨찾기"
-        verbose_name_plural = "그룹 즐겨찾기들"
+        verbose_name_plural = "그룹 즐겨찾기"
         # user와 group 조합이 고유해야 합니다. (한 사용자가 같은 그룹을 두 번 북마크할 수 없음)
         unique_together = ("user", "group")
 

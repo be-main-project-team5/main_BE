@@ -1,7 +1,6 @@
 from django.db import models
 
-from apps.groups.models import GroupSchedule
-from apps.idols.models import IdolSchedule
+from apps.schedules.models import GroupSchedule, IdolSchedule
 from apps.users.models import CustomUser
 
 

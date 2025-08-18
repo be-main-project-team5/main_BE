@@ -5,8 +5,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.groups.models import GroupSchedule
-from apps.idols.models import IdolSchedule
+from apps.schedules.models import GroupSchedule, IdolSchedule
 
 from .models import Alarm
 from .serializers import AlarmSerializer

@@ -1,11 +1,9 @@
 from rest_framework import viewsets
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny  # AllowAny를 임포트합니다.
 
-from apps.idols.models import Idol, IdolManager  # 권한 체크 위해 추가
+from apps.common.permissions import IsManagerOrAdminOrReadOnly
 
-from .models import Group, GroupSchedule
-from .serializers import GroupScheduleSerializer, GroupSerializer
+from .models import Group
+from .serializers import GroupSerializer
 
 
 # Django REST Framework의 ViewSet을 사용하여 Group 모델에 대한 API 엔드포인트를 제공합니다.
@@ -23,48 +21,4 @@ class GroupViewSet(viewsets.ModelViewSet):
     # Python 객체(Group 모델 인스턴스)를 JSON과 같은 웹 친화적인 형식으로 변환하거나 그 반대로 변환합니다.
     serializer_class = GroupSerializer
 
-    # 이 ViewSet에 대한 접근 권한을 설정합니다.
-    # AllowAny는 어떤 사용자든(인증되지 않은 사용자 포함) 이 API에 접근할 수 있도록 허용합니다.
-    # 이는 개발 및 테스트 목적으로 임시로 설정하는 것이며, 실제 서비스에서는 적절한 인증 및 권한 설정이 필요합니다.
-    permission_classes = [AllowAny]
-
-
-class GroupScheduleViewSet(viewsets.ModelViewSet):
-    """
-    특정 그룹에 속한 스케줄을 관리하는 ViewSet
-    """
-
-    queryset = GroupSchedule.objects.all()
-    serializer_class = GroupScheduleSerializer
-    permission_classes = [AllowAny]  # 임시로 모든 접근 허용
-
-    def get_queryset(self):
-        """
-        URL에서 group_pk를 받아 해당 그룹의 스케줄만 필터링하여 반환합니다.
-        """
-        group_pk = self.kwargs.get("group_pk")
-        return self.queryset.filter(group_id=group_pk)
-
-    def perform_create(self, serializer):
-        """
-        스케줄 생성 시, URL의 group_pk를 사용하여 group 필드를 자동으로 설정합니다.
-        """
-        group_pk = self.kwargs.get("group_pk")
-        group = get_object_or_404(Group, pk=group_pk)
-
-        # 이 그룹에 속한 아이돌 목록 가져오기
-        idols_in_group = Idol.objects.filter(group=group)
-
-        # 현재 유저가 이 중 한 아이돌의 매니저인지 확인
-        is_manager = IdolManager.objects.filter(
-            user=self.request.user, idol__in=idols_in_group
-        ).exists()
-
-        if not is_manager:
-            # 권한 없으면 예외 발생
-            from rest_framework.exceptions import PermissionDenied
-
-            raise PermissionDenied("이 그룹의 스케줄 등록 권한이 없습니다.")
-
-        # 권한 통과 시 저장
-        serializer.save(group=group)
+    permission_classes = [IsManagerOrAdminOrReadOnly]
