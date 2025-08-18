@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test App Home</title>
+</head>
+<body>
+    <h1>Test App Landing Page</h1>
+    <p>Please select an option:</p>
+    <ul>
+        <li><a href="/test/signup/">회원가입</a></li>
+    </ul>
+
+    <hr>
+
+    <h2>일반 로그인</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="email">이메일:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">비밀번호:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <input type="submit" value="로그인">
+    </form>
+
+    {% if error %}
+    <p style="color: red;">오류: {{ error }}</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>소셜 로그인</h2>
+    <a href="https://kauth.kakao.com/oauth/authorize?client_id={{ kakao_rest_api_key }}&redirect_uri={{ kakao_redirect_uri }}&response_type=code">
+        <img src="//k.kakaocdn.net/14/dn/btroDszwNrM/I6efHub1SN5KCJqLm1Ovx1/o.jpg" width="222" alt="카카오 로그인"/>
+    </a>
+    <br>
+    <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id={{ google_client_id }}&redirect_uri=http://127.0.0.1:8000/api/v1/users/google/callback/&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email" style="margin-top: 10px; display: inline-block;">
+        <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="구글 로그인"/>
+    </a>
+
+</body>
+</html>

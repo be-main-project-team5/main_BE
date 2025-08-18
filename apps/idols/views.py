@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Idol, IdolManager
-from .serializers import IdolSerializer
+from .serializers import IdolSerializer, IdolGroupSerializer
+from apps.common.permissions import IsManagerOrAdminOrReadOnly
 
 
 class IdolListView(generics.ListAPIView):
@@ -100,6 +101,21 @@ from apps.schedules.models import IdolSchedule
 from apps.schedules.serializers import IdolScheduleSerializer
 from datetime import date
 
+
+class IdolGroupUpdateView(generics.UpdateAPIView):
+    """아이돌의 그룹을 변경하는 API 뷰"""
+    queryset = Idol.objects.all()
+    serializer_class = IdolGroupSerializer
+    permission_classes = [IsManagerOrAdminOrReadOnly]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        # 매니저는 자신이 담당하는 아이돌만 수정 가능
+        if self.request.user.role == 'MANAGER':
+            managed_idol_ids = IdolManager.objects.filter(user=self.request.user).values_list('idol_id', flat=True)
+            return Idol.objects.filter(id__in=managed_idol_ids)
+        # 관리자는 모든 아이돌 수정 가능
+        return Idol.objects.all()
 
 class IdolMainboardView(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -60,9 +60,13 @@ THIRD_PARTY_APPS = [
     "apps.alarms",
     "apps.test_app.apps.TestAppConfig",
     "apps.schedules",
+    "apps.admins.apps.AdminsConfig",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + [
+    "django_filters", # 추가
+]
 
 
 MIDDLEWARE = [
@@ -232,3 +236,12 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,  # 컴포넌트를 별도의 요청으로 분할하여 로딩 속도 개선
     # 기타 필요한 설정 추가 가능
 }
+
+# Kakao Social Login Settings
+KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
+KAKAO_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/kakao/callback/"
+
+# Google Social Login Settings
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/google/callback/"

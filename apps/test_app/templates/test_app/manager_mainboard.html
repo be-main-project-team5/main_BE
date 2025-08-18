@@ -2,63 +2,128 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>매니저 메인보드</title>
+    <title>매니저 대시보드</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        ul { list-style-type: none; padding: 0; }
-        li { background-color: #e9e9e9; margin-bottom: 10px; padding: 10px; border-radius: 5px; }
-        .schedule-title { font-weight: bold; color: #0056b3; }
-        .schedule-time { font-size: 0.9em; color: #666; }
-        .schedule-location { font-size: 0.9em; color: #666; }
-        .schedule-description { font-size: 0.9em; color: #444; }
-        .no-schedules { color: #888; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2, h3, h4 { color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 1em; margin-bottom: 2em; }
+        .user-info a { margin-left: 1em; text-decoration: none; color: #555; }
+        .section { margin-bottom: 2em; padding: 1.5em; border: 1px solid #eee; border-radius: 5px; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .schedule-container { display: grid; grid-template-columns: 3fr 1fr; gap: 2em; }
+        .form-container, .list-container { background: #f9f9f9; padding: 1.5em; border-radius: 5px; }
+        .form-group { margin-bottom: 1em; }
+        .form-group label { display: block; margin-bottom: .5em; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        .form-group button { padding: 10px 15px; cursor: pointer; }
+        .idol-list, .schedule-list { list-style: none; padding: 0; }
+        .idol-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.8em; border-bottom: 1px solid #ddd; }
+        .schedule-item { padding: 0.8em; border-bottom: 1px solid #ddd; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>매니저 메인보드 - 담당 아이돌 스케줄</h1>
-        <p><a href="/test/">메인으로 돌아가기</a></p>
-    </div>
+        <div class="header">
+            <h1>매니저 대시보드</h1>
+            <div class="user-info">
+                <span><strong>{{ user.nickname }}</strong>님 ({{ user.role }})</span>
+                <a href="{% url 'profile' %}">프로필 수정</a>
+                <a href="{% url 'logout' %}">로그아웃</a>
+            </div>
+        </div>
 
-    <div class="container">
-        <h2>담당하는 아이돌 스케줄(오늘)</h2>
-        {% if today_schedules %}
-            <ul>
-                {% for schedule in today_schedules %}
-                    <li>
-                        <div class="schedule-title">{{ schedule.idol.name }} - {{ schedule.title }}</div>
-                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
-                        <div class="schedule-location">장소: {{ schedule.location }}</div>
-                        <div class="schedule-description">설명: {{ schedule.description }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-schedules">오늘 예정된 담당 아이돌 스케줄이 없습니다.</p>
-        {% endif %}
-    </div>
+        <div class="grid-container">
+            <div class="section">
+                <h3>그룹 관리</h3>
+                <div class="form-container">
+                    <h4>새 그룹 생성</h4>
+                    <form action="{% url 'create_group' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group"><label for="name">그룹명</label><input type="text" name="name" id="name" required></div>
+                        <div class="form-group"><label for="debut_date">데뷔일</label><input type="date" name="debut_date" id="debut_date" required></div>
+                        <div class="form-group"><label for="agency">소속사</label><input type="text" name="agency" id="agency" required></div>
+                        <button type="submit">그룹 생성</button>
+                    </form>
+                </div>
+            </div>
+            <div class="section">
+                <h3>담당 아이돌 그룹 배정</h3>
+                <div class="list-container">
+                    <ul class="idol-list">
+                        {% for idol_manager in managed_idols %}
+                            <li>
+                                <span>{{ idol_manager.idol.name }} ({{ idol_manager.idol.group.name|default:"그룹 없음" }})</span>
+                                <form action="{% url 'update_idol_group' idol_manager.idol.id %}" method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <select name="group_id" onchange="this.form.submit()">
+                                        <option value="">그룹에서 제외</option>
+                                        {% for group in all_groups %}
+                                            <option value="{{ group.id }}" {% if idol_manager.idol.group_id == group.id %}selected{% endif %}>{{ group.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </li>
+                        {% empty %}
+                            <li>담당하는 아이돌이 없습니다.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-    <div class="container">
-        <h2>담당하는 아이돌 스케줄(전체)</h2>
-        {% if all_schedules %}
-            <ul>
-                {% for schedule in all_schedules %}
-                    <li>
-                        <div class="schedule-title">{{ schedule.idol.name }} - {{ schedule.title }}</div>
-                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
-                        <div class="schedule-location">장소: {{ schedule.location }}</div>
-                        <div class="schedule-description">설명: {{ schedule.description }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-schedules">등록된 담당 아이돌 전체 스케줄이 없습니다.</p>
-        {% endif %}
+        <div class="section">
+            <h2>새 스케줄 등록</h2>
+            <div class="grid-container">
+                <div class="form-container">
+                    <h4>아이돌 개별 스케줄</h4>
+                    <form action="{% url 'add_schedule' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="schedule_type" value="idol">
+                        <div class="form-group"><label>아이돌</label><select name="idol_id" required>{% for m in managed_idols %}<option value="{{ m.idol.id }}">{{ m.idol.name }}</option>{% endfor %}</select></div>
+                        <div class="form-group"><label>제목</label><input type="text" name="title" required></div>
+                        <div class="form-group"><label>시작</label><input type="datetime-local" name="start_time" required></div>
+                        <div class="form-group"><label>종료</label><input type="datetime-local" name="end_time" required></div>
+                        <div class="form-group"><label>장소</label><input type="text" name="location"></div>
+                        <div class="form-group"><label>설명</label><textarea name="description" rows="2"></textarea></div>
+                        <button type="submit">등록</button>
+                    </form>
+                </div>
+                <div class="form-container">
+                    <h4>그룹 스케줄</h4>
+                    <form action="{% url 'add_schedule' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="schedule_type" value="group">
+                        <div class="form-group"><label>그룹</label><select name="group_id" required>{% for group in all_groups %}{% if group.manager == user %}<option value="{{ group.id }}">{{ group.name }}</option>{% endif %}{% endfor %}</select></div>
+                        <div class="form-group"><label>제목</label><input type="text" name="title" required></div>
+                        <div class="form-group"><label>시작</label><input type="datetime-local" name="start_time" required></div>
+                        <div class="form-group"><label>종료</label><input type="datetime-local" name="end_time" required></div>
+                        <div class="form-group"><label>장소</label><input type="text" name="location"></div>
+                        <div class="form-group"><label>설명</label><textarea name="description" rows="2"></textarea></div>
+                        <button type="submit">등록</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="section schedule-container">
+            <div>
+                <h2>월간 스케줄</h2>
+                <div class="schedule-list">
+                    {% for schedule in monthly_schedules %}
+                        <div class="schedule-item"><strong>{{ schedule.title }}</strong> ({{ schedule.start_time|date:"Y-m-d H:i" }})</div>
+                    {% empty %}<p>이번 달 스케줄이 없습니다.</p>{% endfor %}
+                </div>
+            </div>
+            <div>
+                <h2>오늘의 스케줄</h2>
+                <div class="schedule-list">
+                    {% for schedule in today_schedules %}
+                        <div class="schedule-item"><strong>{{ schedule.title }}</strong> ({{ schedule.start_time|date:"H:i" }})</div>
+                    {% empty %}<p>오늘 스케줄이 없습니다.</p>{% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

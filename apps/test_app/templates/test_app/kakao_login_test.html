@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kakao Login Test</title>
+</head>
+<body>
+    <h1>Kakao Social Login Test Page</h1>
+    <p>Click the button below to start the Kakao login process.</p>
+    <a href="https://kauth.kakao.com/oauth/authorize?client_id={{ kakao_rest_api_key }}&redirect_uri={{ kakao_redirect_uri }}&response_type=code">
+        <img src="//k.kakaocdn.net/14/dn/btroD9DUcRk/kPiGKHhZWdI2RtzIGRVEZ1/o.jpg" width="222" alt="카카오 로그인"/>
+    </a>
+    <hr>
+    <h2>Login Flow:</h2>
+    <ol>
+        <li>Clicking the button will take you to Kakao's login page.</li>
+        <li>After you log in and consent, Kakao will redirect you to our backend's callback URL.</li>
+        <li>Our backend will process the login, create an account if needed, and issue JWT tokens.</li>
+        <li>Since this is a simple test page, the final tokens will be displayed as a JSON response in your browser. A real frontend would handle this response and store the tokens.</li>
+    </ol>
+</body>
+</html>

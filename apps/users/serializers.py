@@ -103,7 +103,10 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 # 사용자 프로필 조회 및 수정
-class UserProfileSerializer(serializers.ModelSerializer):
+from apps.common.mixins import ImageUpdateSerializerMixin
+
+
+class UserProfileSerializer(ImageUpdateSerializerMixin, serializers.ModelSerializer):
     profile_image = serializers.ImageField(
         required=False, allow_null=True, write_only=True
     )
@@ -149,44 +152,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        profile_image_file = validated_data.pop("profile_image", None)
+        # Use the mixin to handle the profile image update
+        self._update_image(instance, validated_data, "profile_image")
 
-        # 닉네임 업데이트
+        # Update other fields
         instance.nickname = validated_data.get("nickname", instance.nickname)
-
-        # 프로필 이미지 처리
-        if profile_image_file is not None:  # 이미지가 제공된 경우 (새 이미지 또는 null)
-            # 기존 이미지 삭제
-            if instance.profile_image:
-                # 파일 시스템에서 이미지 파일 삭제
-                if default_storage.exists(
-                    instance.profile_image.url.replace(settings.MEDIA_URL, "")
-                ):
-                    default_storage.delete(
-                        instance.profile_image.url.replace(settings.MEDIA_URL, "")
-                    )
-                instance.profile_image.delete()  # Image 모델 인스턴스 삭제
-
-            if profile_image_file:  # 새 이미지가 있는 경우
-                new_image = Image(image_file=profile_image_file)
-                new_image.save()
-                instance.profile_image = new_image
-            else:  # 이미지를 null로 설정 (삭제 요청)
-                instance.profile_image = None
-        elif (
-            "profile_image" in self.context["request"].data
-            and self.context["request"].data["profile_image"] == "null"
-        ):
-            # 클라이언트에서 명시적으로 "profile_image": null을 보낸 경우 (이미지 삭제)
-            if instance.profile_image:
-                if default_storage.exists(
-                    instance.profile_image.url.replace(settings.MEDIA_URL, "")
-                ):
-                    default_storage.delete(
-                        instance.profile_image.url.replace(settings.MEDIA_URL, "")
-                    )
-                instance.profile_image.delete()
-            instance.profile_image = None
 
         instance.save()
         return instance
@@ -194,7 +164,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 # 비밀번호 변경
 class PasswordChangeSerializer(serializers.Serializer):
-    current_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(write_only=True, required=True, min_length=8)
     confirm_new_password = serializers.CharField(
         write_only=True, required=True, min_length=8
@@ -202,12 +171,6 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     def validate(self, data):
         user = self.context["request"].user
-        # 현재 비밀번호 확인
-        if not user.check_password(data["current_password"]):
-            raise serializers.ValidationError(
-                {"current_password": "현재 비밀번호가 일치하지 않습니다."}
-            )
-
         # 새 비밀번호와 확인 비밀번호 일치 여부 검사
         if data["new_password"] != data["confirm_new_password"]:
             raise serializers.ValidationError(

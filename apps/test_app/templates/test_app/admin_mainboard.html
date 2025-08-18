@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 대시보드</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 1em; margin-bottom: 2em; }
+        .user-info a { margin-left: 1em; text-decoration: none; color: #555; }
+        .section { margin-bottom: 2em; padding: 1.5em; border: 1px solid #eee; border-radius: 5px; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .form-container, .list-container { background: #f9f9f9; padding: 1em; border-radius: 5px; }
+        .form-group { margin-bottom: 1em; }
+        .form-group label { display: block; margin-bottom: .5em; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; }
+        .form-group button { padding: 10px 15px; }
+        .controls { display: flex; justify-content: space-between; margin-bottom: 1em; align-items: center; }
+        .search-form { display: flex; gap: 0.5em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th a { text-decoration: none; color: #333; font-weight: bold; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>관리자 대시보드</h1>
+            <div class="user-info">
+                <span><strong>{{ user.nickname }}</strong>님 ({{ user.role }})</span>
+                <a href="{% url 'logout' %}">로그아웃</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>매니저-아이돌 담당 설정</h2>
+            <div class="grid-container">
+                <div class="form-container">
+                    <h3>새 담당 지정</h3>
+                    <form action="{% url 'test_admin_assign_manager' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="manager_id">매니저 선택</label>
+                            <select name="manager_id" id="manager_id" required>
+                                <option value="">---</option>
+                                {% for manager in all_managers %}<option value="{{ manager.id }}">{{ manager.nickname }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="idol_id">아이돌 선택</label>
+                            <select name="idol_id" id="idol_id" required>
+                                <option value="">---</option>
+                                {% for idol in all_idols %}<option value="{{ idol.id }}">{{ idol.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit">담당시키기</button>
+                    </form>
+                </div>
+                <div class="list-container">
+                    <h3>현재 담당 목록</h3>
+                    <table>
+                        {% for assignment in manager_assignments %}
+                        <tr>
+                            <td>{{ assignment.user.nickname }}</td>
+                            <td>→</td>
+                            <td>{{ assignment.idol.name }}</td>
+                            <td>
+                                <form action="{% url 'test_admin_unassign_manager' assignment.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn">해제</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4">담당 관계가 없습니다.</td></tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>사용자 목록</h2>
+            <div class="controls">
+                <form method="get">
+                    <select name="role" onchange="this.form.submit()">
+                        <option value="">모든 역할</option>
+                        <option value="NORMAL" {% if current_role_filter == 'NORMAL' %}selected{% endif %}>일반 사용자</option>
+                        <option value="IDOL" {% if current_role_filter == 'IDOL' %}selected{% endif %}>아이돌</option>
+                        <option value="MANAGER" {% if current_role_filter == 'MANAGER' %}selected{% endif %}>매니저</option>
+                        <option value="ADMIN" {% if current_role_filter == 'ADMIN' %}selected{% endif %}>관리자</option>
+                    </select>
+                </form>
+                <form class="search-form" method="get">
+                    <input type="hidden" name="role" value="{{ current_role_filter|default:'' }}">
+                    <input type="text" name="search" placeholder="이메일 또는 닉네임 검색" value="{{ current_search|default:'' }}">
+                    <button type="submit">검색</button>
+                </form>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th><a href="?ordering=nickname&role={{ current_role_filter|default:'' }}&search={{ current_search|default:'' }}">닉네임</a></th>
+                        <th>이메일</th>
+                        <th><a href="?ordering=role&role={{ current_role_filter|default:'' }}&search={{ current_search|default:'' }}">역할</a></th>
+                        <th><a href="?ordering=-date_joined&role={{ current_role_filter|default:'' }}&search={{ current_search|default:'' }}">가입일</a></th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in user_list %}
+                    <tr>
+                        <td>{{ u.nickname }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>{{ u.role }}</td>
+                        <td>{{ u.date_joined|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if u.role == 'IDOL' and u.idol %}
+                            <form action="{% url 'test_admin_update_idol_group' u.idol.id %}" method="post" style="display: inline-flex; align-items: center; gap: 5px;">
+                                {% csrf_token %}
+                                <select name="group_id" onchange="this.form.submit()">
+                                    <option value="">그룹 없음</option>
+                                    {% for group in all_groups %}
+                                        <option value="{{ group.id }}" {% if u.idol.group_id == group.id %}selected{% endif %}>{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                            {% endif %}
+
+                            {% if not u.is_superuser %}
+                            <form action="{% url 'test_admin_delete_user' u.id %}" method="post" onsubmit="return confirm('정말로 이 사용자를 탈퇴시키겠습니까?');" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-btn">탈퇴</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5">해당 조건의 사용자가 없습니다.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>계정 생성</h2>
+            <div class="grid-container">
+                <div class="form-container">
+                    <h3>매니저 계정 생성</h3>
+                    <form action="{% url 'test_admin_create_manager' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group"><label>이메일</label><input type="email" name="email" required></div>
+                        <div class="form-group"><label>닉네임</label><input type="text" name="nickname" required></div>
+                        <div class="form-group"><label>비밀번호</label><input type="password" name="password" required></div>
+                        <button type="submit">생성</button>
+                    </form>
+                </div>
+                <div class="form-container">
+                    <h3>아이돌 계정 생성</h3>
+                    <form action="{% url 'test_admin_create_idol' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group"><label>이메일</label><input type="email" name="email" required></div>
+                        <div class="form-group"><label>닉네임</label><input type="text" name="nickname" required></div>
+                        <div class="form-group"><label>비밀번호</label><input type="password" name="password" required></div>
+                        <button type="submit">생성</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

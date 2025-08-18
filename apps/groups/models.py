@@ -12,7 +12,7 @@ class Group(models.Model):
     # 그룹의 이름입니다.
     # CharField는 문자열을 저장하며, max_length는 최대 길이를 100자로 제한합니다.
     # unique=True는 이 필드의 값이 데이터베이스 전체에서 고유해야 함을 의미합니다.
-    name = models.CharField(max_length=100, unique=True, help_text="그룹 이름")
+    name = models.CharField(max_length=50, unique=True)
 
     # 그룹의 데뷔 일자입니다.
     # DateField는 날짜(년, 월, 일)를 저장합니다.
@@ -20,6 +20,16 @@ class Group(models.Model):
 
     # 그룹의 소속사 이름입니다.
     agency = models.CharField(max_length=100, help_text="소속사")
+
+    # 그룹을 담당하는 매니저 (CustomUser 모델의 ForeignKey)
+    manager = models.ForeignKey(
+        "users.CustomUser",  # 'apps.users.models.CustomUser' 대신 문자열 참조 사용
+        on_delete=models.SET_NULL,  # 매니저가 삭제되어도 그룹 정보는 유지
+        null=True,  # 매니저가 없을 수도 있습니다.
+        blank=True,
+        related_name="managed_groups",  # 역참조 이름 설정
+        help_text="그룹 담당 매니저"
+    )
 
     # 그룹 로고 이미지 ID (Image 모델의 ForeignKey)
     logo_image = models.ForeignKey(
@@ -47,6 +57,3 @@ class Group(models.Model):
     # Django 관리자 페이지나 디버깅 시 그룹의 이름을 쉽게 식별할 수 있도록 합니다.
     def __str__(self):
         return self.name
-
-
-

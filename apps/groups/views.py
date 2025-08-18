@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny  # AllowAny를 임포트합니다.
+from apps.common.permissions import IsManagerOrAdminOrReadOnly
 
 from .models import Group
 from .serializers import GroupSerializer
@@ -20,10 +20,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     # Python 객체(Group 모델 인스턴스)를 JSON과 같은 웹 친화적인 형식으로 변환하거나 그 반대로 변환합니다.
     serializer_class = GroupSerializer
 
-    # 이 ViewSet에 대한 접근 권한을 설정합니다.
-    # AllowAny는 어떤 사용자든(인증되지 않은 사용자 포함) 이 API에 접근할 수 있도록 허용합니다.
-    # 이는 개발 및 테스트 목적으로 임시로 설정하는 것이며, 실제 서비스에서는 적절한 인증 및 권한 설정이 필요합니다.
-    permission_classes = [AllowAny]
+    permission_classes = [IsManagerOrAdminOrReadOnly]
 
 
 

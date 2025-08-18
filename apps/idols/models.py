@@ -5,7 +5,7 @@ from django.db import models
 class Idol(models.Model):
     user = models.OneToOneField( settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # 유저와 1대1이므로 원투원 필드 사용
     group = models.ForeignKey("groups.Group", on_delete=models.SET_NULL, null=True, blank=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=50, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

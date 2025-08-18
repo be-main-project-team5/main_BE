@@ -2,91 +2,69 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>즐겨찾기한 페이지 보기</title>
+    <title>팬 메인 페이지</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         h1, h2 { color: #333; }
-        ul { list-style-type: none; padding: 0; }
-        li { background-color: #e9e9e9; margin-bottom: 10px; padding: 10px; border-radius: 5px; }
-        .schedule-title { font-weight: bold; color: #0056b3; }
-        .schedule-time { font-size: 0.9em; color: #666; }
-        .schedule-location { font-size: 0.9em; color: #666; }
-        .schedule-description { font-size: 0.9em; color: #444; }
-        .no-schedules { color: #888; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 1em; margin-bottom: 2em; }
+        .user-info a { margin-left: 1em; text-decoration: none; color: #555; }
+        .grid-container { display: grid; grid-template-columns: 1fr 3fr; gap: 2em; }
+        .sidebar .section { margin-bottom: 1.5em; }
+        .schedule-container { display: grid; grid-template-columns: 3fr 1fr; gap: 2em; }
+        .schedule-list, .bookmark-list { list-style: none; padding: 0; }
+        .schedule-item, .bookmark-list li { padding: 0.8em; border-bottom: 1px solid #ddd; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>즐겨찾기한 페이지 보기</h1>
-        <p><a href="/test/">메인으로 돌아가기</a></p>
-    </div>
+        <div class="header">
+            <h1>{{ user.nickname }}님, 환영합니다!</h1>
+            <div class="user-info">
+                <a href="{% url 'profile' %}">프로필 수정</a>
+                <a href="{% url 'logout' %}">로그아웃</a>
+            </div>
+        </div>
 
-    <div class="container">
-        <h2>북마크한 아이돌 스케줄</h2>
-        {% if bookmarked_idol_schedules %}
-            <ul>
-                {% for schedule in bookmarked_idol_schedules %}
-                    <li>
-                        <div class="schedule-title">{{ schedule.idol.name }} - {{ schedule.title }}</div>
-                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
-                        <div class="schedule-location">장소: {{ schedule.location }}</div>
-                        <div class="schedule-description">설명: {{ schedule.description }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-schedules">북마크한 아이돌 스케줄이 없습니다.</p>
-        {% endif %}
-    </div>
+        <div class="grid-container">
+            <div class="sidebar">
+                <div class="section">
+                    <h2>바로가기</h2>
+                    <a href="{% url 'idol_list' %}">전체 아이돌 보기</a><br>
+                    <a href="{% url 'group_list' %}">전체 그룹 보기</a><br>
+                    <a href="{% url 'my_schedules' %}">내 일정 모아보기</a>
+                </div>
+                <div class="section">
+                    <h2>즐겨찾는 아이돌</h2>
+                    <ul class="bookmark-list">{% for b in bookmarked_idols %}<li><a href="{% url 'idol_detail' b.idol.id %}">{{ b.idol.name }}</a></li>{% empty %}<li>없음</li>{% endfor %}</ul>
+                </div>
+                <div class="section">
+                    <h2>즐겨찾는 그룹</h2>
+                    <ul class="bookmark-list">{% for b in bookmarked_groups %}<li>{{ b.group.name }}</li>{% empty %}<li>없음</li>{% endfor %}</ul>
+                </div>
+            </div>
 
-    <div class="container">
-        <h2>북마크한 그룹 스케줄</h2>
-        {% if bookmarked_group_schedules %}
-            <ul>
-                {% for schedule in bookmarked_group_schedules %}
-                    <li>
-                        <div class="schedule-title">{{ schedule.group.name }} - {{ schedule.description|truncatechars:50 }}</div>
-                        <div class="schedule-time">{{ schedule.start_time|date:"Y.m.d H:i" }} ~ {{ schedule.end_time|date:"Y.m.d H:i" }}</div>
-                        <div class="schedule-location">장소: {{ schedule.location }}</div>
-                        <div class="schedule-description">설명: {{ schedule.description }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-schedules">북마크한 그룹 스케줄이 없습니다.</p>
-        {% endif %}
-    </div>
-
-    <div class="container">
-        <h2>개인 즐겨찾기 스케줄</h2>
-        {% if user_personal_schedules %}
-            <ul>
-                {% for user_schedule in user_personal_schedules %}
-                    <li>
-                        {% if user_schedule.idol_schedule %}
-                            <div class="schedule-title">아이돌 스케줄: {{ user_schedule.idol_schedule.idol.name }} - {{ user_schedule.idol_schedule.title }}</div>
-                            <div class="schedule-time">{{ user_schedule.idol_schedule.start_time|date:"Y.m.d H:i" }} ~ {{ user_schedule.idol_schedule.end_time|date:"Y.m.d H:i" }}</div>
-                            <div class="schedule-location">장소: {{ user_schedule.idol_schedule.location }}</div>
-                            <div class="schedule-description">설명: {{ user_schedule.idol_schedule.description }}</div>
-                        {% elif user_schedule.group_schedule %}
-                            <div class="schedule-title">그룹 스케줄: {{ user_schedule.group_schedule.group.name }} - {{ user_schedule.group_schedule.description|truncatechars:50 }}</div>
-                            <div class="schedule-time">{{ user_schedule.group_schedule.start_time|date:"Y.m.d H:i" }} ~ {{ user_schedule.group_schedule.end_time|date:"Y.m.d H:i" }}</div>
-                            <div class="schedule-location">장소: {{ user_schedule.group_schedule.location }}</div>
-                            <div class="schedule-description">설명: {{ user_schedule.group_schedule.description }}</div>
-                        {% else %}
-                            <div class="schedule-title">알 수 없는 스케줄</div>
-                        {% endif %}
-                        <div class="schedule-added">추가됨: {{ user_schedule.added_at|date:"Y.m.d H:i" }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="no-schedules">개인적으로 즐겨찾기한 스케줄이 없습니다.</p>
-        {% endif %}
+            <div class="main-content">
+                <div class="schedule-container">
+                    <div>
+                        <h2>월간 스케줄</h2>
+                        <div class="schedule-list">
+                            {% for schedule in monthly_schedules %}
+                                <div class="schedule-item"><strong>{{ schedule.title }}</strong> - {{ schedule.start_time|date:"Y-m-d H:i" }}</div>
+                            {% empty %}<p>이번 달 스케줄이 없습니다.</p>{% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <h2>오늘의 스케줄</h2>
+                        <div class="schedule-list">
+                            {% for schedule in today_schedules %}
+                                <div class="schedule-item"><strong>{{ schedule.title }}</strong> - {{ schedule.start_time|date:"H:i" }}</div>
+                            {% empty %}<p>오늘 스케줄이 없습니다.</p>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -14,10 +14,11 @@ class IdolScheduleSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class GroupScheduleSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = GroupSchedule
         fields = '__all__'
-        read_only_fields = ('author',) # author 필드는 자동으로 설정되므로 읽기 전용
 
 
 class UserScheduleCreateSerializer(serializers.ModelSerializer):

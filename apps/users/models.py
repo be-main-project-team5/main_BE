@@ -36,13 +36,7 @@ class Image(models.Model):
             self.file_size = self.image_file.size
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        # 모델 인스턴스가 삭제될 때 연결된 파일도 삭제합니다.
-        if self.image_file:
-            self.image_file.delete(
-                save=False
-            )  # save=False는 모델의 save 메서드를 다시 호출하지 않도록 합니다.
-        super().delete(*args, **kwargs)
+    
 
     def __str__(self):
         # 객체를 문자열로 표현할 때 이미지 URL을 반환합니다.
@@ -112,6 +106,10 @@ class CustomUser(AbstractUser):
     role = models.CharField(
         max_length=10, choices=ROLE_CHOICES, default="NORMAL", null=False, blank=False
     )
+
+    # 소셜 로그인 정보
+    social_provider = models.CharField(max_length=30, blank=True, null=True)
+    social_id = models.CharField(max_length=255, blank=True, null=True)
 
     # is_superuser와 is_staff는 AbstractUser에 정의
     # is_superuser = models.BooleanField(default=False)

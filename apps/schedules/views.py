@@ -37,12 +37,21 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = GroupScheduleSerializer
     permission_classes = [IsManagerOrAdmin]
 
-    def perform_create(self, serializer):
-        # 스케줄 생성 시 현재 로그인한 사용자를 author로 설정
-        serializer.save(author=self.request.user)
+    def get_queryset(self):
+        # 관리자는 모든 그룹 스케줄 조회 가능
+        if self.request.user.is_staff:
+            return GroupSchedule.objects.all()
+        # 매니저는 자신이 담당하는 그룹의 스케줄만 조회 가능
+        elif self.request.user.role == 'MANAGER':
+            managed_group_ids = self.request.user.managed_groups.values_list('id', flat=True)
+            return GroupSchedule.objects.filter(group__id__in=managed_group_ids)
+        return GroupSchedule.objects.none()
 
-    def perform_update(self, serializer):
-        # 스케줄 수정 시 현재 로그인한 사용자를 author로 설정 (선택 사항, 필요에 따라)
+    def perform_create(self, serializer):
+        group = serializer.validated_data.get('group')
+        # 요청한 사용자가 해당 그룹의 매니저인지 확인
+        if not self.request.user.is_staff and group.manager != self.request.user:
+            raise PermissionDenied("이 그룹의 스케줄을 생성할 권한이 없습니다.")
         serializer.save(author=self.request.user)
 
 
