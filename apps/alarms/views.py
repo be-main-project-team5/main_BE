@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,7 +10,6 @@ from apps.idols.models import IdolSchedule
 
 from .models import Alarm
 from .serializers import AlarmSerializer
-from .tasks import send_scheduled_alarms
 
 
 class AlarmListView(APIView):
