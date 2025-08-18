@@ -1,5 +1,7 @@
-[tool.setuptools.packages.find]
-where = ["apps", "config"]
+
+
+# [tool.setuptools.packages.find]
+# where = ["apps", "config"]
 
 [project]
 name = "main-be"

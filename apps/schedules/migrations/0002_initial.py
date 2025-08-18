@@ -59,39 +59,5 @@ class Migration(migrations.Migration):
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
-        migrations.AddField(
-            model_name="userschedule",
-            name="group_schedule",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="user_added_schedules",
-                to="schedules.groupschedule",
-            ),
-        ),
-        migrations.AddField(
-            model_name="userschedule",
-            name="idol_schedule",
-            field=models.ForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="user_added_schedules",
-                to="schedules.idolschedule",
-            ),
-        ),
-        migrations.AddField(
-            model_name="userschedule",
-            name="user",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="my_schedules",
-                to=settings.AUTH_USER_MODEL,
-            ),
-        ),
-        migrations.AlterUniqueTogether(
-            name="userschedule",
-            unique_together={("user", "group_schedule"), ("user", "idol_schedule")},
-        ),
+        
     ]
