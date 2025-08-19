@@ -94,7 +94,11 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
 
 def test_chat_room(request, room_name):
-    return render(request, "chats/testHTML.html", {
-        "room_name": room_name,
-        "user_id": request.user.id,
-    })
+    return render(
+        request,
+        "chats/testHTML.html",
+        {
+            "room_name": room_name,
+            "user_id": request.user.id,
+        },
+    )
