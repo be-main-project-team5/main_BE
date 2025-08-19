@@ -66,24 +66,5 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "아이돌 스케줄",
             },
         ),
-        migrations.CreateModel(
-            name="UserSchedule",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("added_at", models.DateTimeField(auto_now_add=True)),
-            ],
-            options={
-                "verbose_name": "사용자 스케줄",
-                "verbose_name_plural": "사용자 스케줄",
-                "db_table": "user_schedules",
-            },
-        ),
+        
     ]

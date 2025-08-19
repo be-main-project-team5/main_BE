@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []  # 배포 시 여기에 도메인 주소 추가.
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]  # 배포 시 여기에 도메인 주소 추가.
 
 
 # Application definition
@@ -66,10 +66,7 @@ THIRD_PARTY_APPS = [
 ]
 
 INSTALLED_APPS = (
-    [
-        "daphne",
-    ]
-    + DJANGO_APPS
+    DJANGO_APPS
     + THIRD_PARTY_APPS
     + ["django_filters"]
 )
