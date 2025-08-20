@@ -66,5 +66,4 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "아이돌 스케줄",
             },
         ),
-        
     ]

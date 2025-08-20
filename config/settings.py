@@ -65,11 +65,7 @@ THIRD_PARTY_APPS = [
     "django_cleanup.apps.CleanupConfig",
 ]
 
-INSTALLED_APPS = (
-    DJANGO_APPS
-    + THIRD_PARTY_APPS
-    + ["django_filters"]
-)
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + ["django_filters"]
 
 # 알람 발송을 1분 주기로 체크하기 위해 작성
 CELERY_BEAT_SCHEDULE = {
