@@ -83,6 +83,26 @@ class UserSignupView(generics.CreateAPIView):
             )
 
 
+@extend_schema(
+    tags=["사용자 (Users)"],
+    summary="사용자 로그인",
+    description="이메일과 비밀번호로 로그인하여 access/refresh 토큰을 발급받습니다.",
+    request=UserLoginSerializer,
+    responses={
+        200: {
+            "description": "로그인 성공",
+            "examples": [
+                {
+                    "user_id": 1,
+                    "access_token": "your_access_token",
+                    "refresh_token": "your_refresh_token",
+                    "profile_image_url": "/media/profile_images/image.jpg",
+                    "role": "NORMAL"
+                }
+            ]
+        }
+    }
+)
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = ()
@@ -112,6 +132,13 @@ class UserLoginView(APIView):
         )
 
 
+@extend_schema(
+    tags=["사용자 (Users)"],
+    summary="사용자 로그아웃",
+    description="현재 로그인된 사용자를 로그아웃 처리하고, refresh 토큰을 만료시킵니다.",
+    request=None,
+    responses={204: {"description": "로그아웃 성공"}}
+)
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -145,6 +172,35 @@ class UserLogoutView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+@extend_schema_view(
+    get=extend_schema(
+        tags=["사용자 (Users)"],
+        summary="마이페이지 조회",
+        description="현재 로그인된 사용자의 프로필 정보를 조회합니다.",
+        responses=UserProfileSerializer,
+    ),
+    put=extend_schema(
+        tags=["사용자 (Users)"],
+        summary="마이페이지 전체 수정",
+        description="현재 로그인된 사용자의 프로필 정보 전체를 수정합니다.",
+        request=UserProfileSerializer,
+        responses=UserProfileSerializer,
+    ),
+    patch=extend_schema(
+        tags=["사용자 (Users)"],
+        summary="마이페이지 부분 수정",
+        description="현재 로그인된 사용자의 프로필 정보 일부(닉네임, 프로필 이미지 등)를 수정합니다.",
+        request=UserProfileSerializer,
+        responses=UserProfileSerializer,
+    ),
+    destroy=extend_schema(
+        tags=["사용자 (Users)"],
+        summary="회원 탈퇴",
+        description="비밀번호를 확인하여 현재 로그인된 사용자를 탈퇴 처리(비활성화)합니다.",
+        request=None,  # 실제로는 password를 받지만, 스키마에서는 명시적으로 표현하기 어려움
+        responses={200: {"description": "회원 탈퇴 성공"}},
+    )
+)
 class MyPageView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserProfileSerializer
@@ -220,6 +276,13 @@ class MyPageView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+@extend_schema(
+    tags=["사용자 (Users)"],
+    summary="현재 비밀번호 확인",
+    description="마이페이지 정보 수정을 위해 현재 사용자의 비밀번호가 일치하는지 확인합니다.",
+    request=None,
+    responses={200: {"description": "비밀번호 일치"}, 401: {"description": "비밀번호 불일치"}}
+)
 class PasswordVerifyView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -242,6 +305,13 @@ class PasswordVerifyView(APIView):
             status=status.HTTP_200_OK,
         )
 
+@extend_schema(
+    tags=["사용자 (Users)"],
+    summary="비밀번호 변경",
+    description="현재 로그인된 사용자의 비밀번호를 새로 변경합니다.",
+    request=PasswordChangeSerializer,
+    responses={200: {"description": "비밀번호 변경 성공"}}
+)
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -269,6 +339,12 @@ class PasswordChangeView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+@extend_schema(
+    tags=["사용자 (Users)"],
+    summary="팬 메인보드 조회",
+    description="로그인된 팬 사용자의 메인보드에 표시될 오늘자 스케줄 정보를 조회합니다.",
+    responses=FanMainboardSerializer(many=True)
+)
 class FanMainboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -308,6 +384,12 @@ class FanMainboardView(APIView):
         serializer = FanMainboardSerializer(all_schedules, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+@extend_schema(
+    tags=["소셜 로그인 (Social Login)"],
+    summary="카카오 소셜 로그인 콜백",
+    description="카카오 로그인 성공 후 인증 코드를 받아 서버의 토큰으로 교환합니다.",
+    responses={200: {"description": "토큰 발급 성공"}}
+)
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
 
@@ -402,6 +484,12 @@ class KakaoCallbackView(APIView):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+@extend_schema(
+    tags=["소셜 로그인 (Social Login)"],
+    summary="구글 소셜 로그인 콜백",
+    description="구글 로그인 성공 후 인증 코드를 받아 서버의 토큰으로 교환합니다.",
+    responses={200: {"description": "토큰 발급 성공"}}
+)
 class GoogleCallbackView(APIView):
     permission_classes = [AllowAny]
 

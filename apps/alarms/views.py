@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,6 +12,11 @@ from .models import Alarm
 from .serializers import AlarmSerializer
 
 
+@extend_schema(
+    tags=["알람 (Alarms)"],
+    summary="내 알람 목록 조회",
+    description="현재 로그인된 사용자의 모든 알람 목록을 조회합니다."
+)
 class AlarmListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -20,24 +26,22 @@ class AlarmListView(APIView):
         return Response(serializer.data)
 
 
+@extend_schema(
+    tags=["알람 (Alarms)"],
+    summary="스케줄 알람 생성",
+    description="특정 아이돌 또는 그룹 스케줄에 대한 알람을 생성합니다. 스케줄 시작 10분 전에 알람이 울립니다."
+)
 class AlarmCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        """
-        사용자 요청: idol_schedule_id 또는 group_schedule_id를 전달
-        → 해당 스케줄의 시작 시간 기준으로 scheduled_time 설정
-        → 알람 생성 + Celery task 예약
-        """
         user = request.user
         idol_schedule_id = request.data.get("idol_schedule_id")
         group_schedule_id = request.data.get("group_schedule_id")
 
         if idol_schedule_id:
             schedule = get_object_or_404(IdolSchedule, id=idol_schedule_id)
-            message = (
-                f"[{schedule.idol.name}] '{schedule.title}' 스케줄 시작 10분 전 알림"
-            )
+            message = f"[{schedule.idol.name}] '{schedule.title}' 스케줄 시작 10분 전 알림"
             scheduled_time = schedule.start_time - timedelta(minutes=10)
             alarm = Alarm.objects.create(
                 user=user,
@@ -47,9 +51,7 @@ class AlarmCreateView(APIView):
             )
         elif group_schedule_id:
             schedule = get_object_or_404(GroupSchedule, id=group_schedule_id)
-            message = (
-                f"[{schedule.group.name}] '{schedule.title}' 스케줄 시작 10분 전 알림"
-            )
+            message = f"[{schedule.group.name}] '{schedule.title}' 스케줄 시작 10분 전 알림"
             scheduled_time = schedule.start_time - timedelta(minutes=10)
             alarm = Alarm.objects.create(
                 user=user,
@@ -69,6 +71,11 @@ class AlarmCreateView(APIView):
         return Response(serializer.data, status=201)
 
 
+@extend_schema_view(
+    get=extend_schema(tags=["알람 (Alarms)"], summary="알람 상세 조회"),
+    patch=extend_schema(tags=["알람 (Alarms)"], summary="알람 읽음 처리"),
+    delete=extend_schema(tags=["알람 (Alarms)"], summary="알람 삭제")
+)
 class AlarmDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
