@@ -3,6 +3,7 @@ from datetime import date
 import requests
 from django.conf import settings
 from django.db import transaction
+from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -32,8 +33,11 @@ def get_tokens_for_user(user):
         "access": str(refresh.access_token),
     }
 
-
-# 사용자 생성 View
+@extend_schema(
+    tags=["사용자 (Users)"],  # 태그를 더 명확하게 변경
+    summary="사용자 회원가입",
+    description="새로운 사용자를 생성합니다. 프로필 이미지 업로드가 가능합니다.",
+)
 class UserSignupView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSignupSerializer
@@ -42,6 +46,7 @@ class UserSignupView(generics.CreateAPIView):
         MultiPartParser,
         FormParser,
     )
+    authentication_classes = ()
 
     def create(self, request, *args, **kwargs):
         try:
@@ -78,9 +83,9 @@ class UserSignupView(generics.CreateAPIView):
             )
 
 
-# 사용자 로그인 View
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = ()
 
     def post(self, request):
         serializer = UserLoginSerializer(
@@ -107,7 +112,6 @@ class UserLoginView(APIView):
         )
 
 
-# 사용자 로그아웃 View
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -140,7 +144,6 @@ class UserLogoutView(APIView):
                 {"error": f"로그아웃 중 오류가 발생했습니다: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
 
 class MyPageView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
@@ -217,7 +220,6 @@ class MyPageView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-
 class PasswordVerifyView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -239,7 +241,6 @@ class PasswordVerifyView(APIView):
             {"message": "비밀번호가 확인되었습니다."},
             status=status.HTTP_200_OK,
         )
-
 
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -267,7 +268,6 @@ class PasswordChangeView(APIView):
                 {"detail": f"비밀번호 변경 중 오류가 발생했습니다. ({str(e)})"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
 
 class FanMainboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -307,7 +307,6 @@ class FanMainboardView(APIView):
 
         serializer = FanMainboardSerializer(all_schedules, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
@@ -402,7 +401,6 @@ class KakaoCallbackView(APIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
 class GoogleCallbackView(APIView):
     permission_classes = [AllowAny]

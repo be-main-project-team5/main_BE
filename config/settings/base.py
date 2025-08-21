@@ -221,8 +221,6 @@ SIMPLE_JWT = {
 }
 
 # Refresh Token Cookie Settings
-REFRESH_TOKEN_COOKIE_SECURE = False  # 개발 환경에서는 False, HTTPS 환경에서는 True
-REFRESH_TOKEN_COOKIE_HTTPONLY = True
 REFRESH_TOKEN_COOKIE_SAMESITE = "Lax"
 
 # drf-spectacular 설정 (API 문서화를 위한 설정)
@@ -230,9 +228,8 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "DingDing API",  # API 문서의 제목
     "DESCRIPTION": "DingDing Service API Documentation",  # API 문서 설명
     "VERSION": "1.0.0",  # API 버전
-    "SERVE_INCLUDE_SCHEMA": False,  # 스키마를 API 엔드포인트로 제공할지 여부
+    "SERVE_INCLUDE_SCHEMA": True,  # 스키마를 API 엔드포인트로 제공할지 여부
     "COMPONENT_SPLIT_REQUEST": True,  # 컴포넌트를 별도의 요청으로 분할하여 로딩 속도 개선
-    # 기타 필요한 설정 추가 가능
 }
 
 
