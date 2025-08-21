@@ -53,16 +53,17 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "django_celery_beat",
-    "channels",  # Channels 앱 추가
-    "apps.users",
-    "apps.groups",
-    "apps.idols",
-    "apps.chats",
-    "apps.bookmarks",
-    "apps.alarms",
-    "apps.schedules",
+    "channels",
+    "apps.users.apps.UsersConfig",
+    "apps.groups.apps.GroupsConfig",
+    "apps.idols.apps.IdolsConfig",
+    "apps.chats.apps.ChatsConfig",
+    "apps.bookmarks.apps.BookmarksConfig",
+    "apps.alarms.apps.AlarmsConfig",
+    "apps.schedules.apps.SchedulesConfig",
     "apps.admins.apps.AdminsConfig",
     "django_cleanup.apps.CleanupConfig",
+
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + ["django_filters"]
