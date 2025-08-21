@@ -23,7 +23,7 @@ services:
     environment:
       # settings.py에서 사용하는 환경 변수를 여기에 설정합니다.
       - SECRET_KEY=${SECRET_KEY}
-      - DB_HOST=db # docker-compose 내부의 db 서비스를 가리킴
+      - DB_HOST=${DB_HOST} # docker-compose 내부의 db 서비스를 가리킴
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
