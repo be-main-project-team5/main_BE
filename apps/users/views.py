@@ -97,6 +97,7 @@ class UserLoginView(APIView):
 
         return Response(
             {
+                "user_id": user.id,
                 "access_token": tokens["access"],
                 "refresh_token": tokens["refresh"],
                 "profile_image_url": profile_image_url,
