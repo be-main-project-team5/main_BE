@@ -17,29 +17,22 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+env_path = BASE_DIR / ".env"
 # .env 파일 로드
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(dotenv_path=env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "SECRET_KEY", "django-insecure-zqrt42uj(ogrd2i+=yj2+@fk=0c!26_f)tzao1hy4ap-1#dt)*"
-)
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS_str = os.getenv("ALLOWED_HOSTS")
-if ALLOWED_HOSTS_str:
-    # 환경 변수가 있으면, 쉼표로 구분된 문자열을 리스트로 변환 (서버 환경용)
-    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_str.split(',')]
-else:
-    # 환경 변수가 없으면, 기본값을 사용 (로컬 개발 환경용)
-    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS_str = []
 
 
 # Application definition
@@ -69,10 +62,10 @@ THIRD_PARTY_APPS = [
     "apps.schedules.apps.SchedulesConfig",
     "apps.admins.apps.AdminsConfig",
     "django_cleanup.apps.CleanupConfig",
-
+    "django_filters",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + ["django_filters"]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
 
 # 알람 발송을 1분 주기로 체크하기 위해 작성
 CELERY_BEAT_SCHEDULE = {
@@ -132,13 +125,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en5.2/ref/settings/#auth-password-validators
@@ -178,10 +164,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-
-# Media files (User-uploaded content)
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+STATIC_ROOT = "/app/staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

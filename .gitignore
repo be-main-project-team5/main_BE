@@ -151,3 +151,10 @@ media
 .gitmessage.txt
 
 # End of .gitignore
+
+main_be.egg-info
+api.html
+api_documentation.html
+backup.sql
+DEPLOYMENT_GUIDE_DOCKER.md
+send_message.py

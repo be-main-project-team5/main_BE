@@ -38,6 +38,10 @@ urlpatterns = [
     path("api/v1/admins/", include("apps.admins.urls")),
     path("api/v1/chats/", include("apps.chats.urls")),
     path("api/v1/alarms/", include("apps.alarms.urls")),
+]
+
+if settings.DEBUG:
+    urlpatterns += (
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
     path(
@@ -50,4 +54,4 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    )

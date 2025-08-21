@@ -4,49 +4,73 @@ services:
   # Redis 서비스
   redis:
     image: redis:7-alpine
-    container_name: main_be_redis
+    container_name: redis
+    restart: unless-stopped
     ports:
       - "6380:6379" # settings.py의 포트(6380)와 맞춤
+    volumes:
+      - redis-data:/data
     command: redis-server --port 6379
+    networks:
+      app_network:
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Django 애플리케이션 서비스
-  web:
-    build: .
-    container_name: main_be_web
-    # Gunicorn 실행 명령어
-    command: gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000
+  django:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: django
+    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - .:/app  # 개발 시 코드 변경을 즉시 반영하기 위해 사용 (프로덕션에서는 제거 가능)
-      - ./media:/app/media # 미디어 파일 볼륨 마운트
+      - static-:/app/staticfiles  # 정적 파일을 위한 볼륨
+      - /app/.venv # - django-venv:/app/.venv  # 가상환경 유지
+    env_file:
+      - .env
     environment:
       # settings.py에서 사용하는 환경 변수를 여기에 설정합니다.
       - SECRET_KEY=${SECRET_KEY}
-      - DB_HOST=${DB_HOST} # docker-compose 내부의 db 서비스를 가리킴
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      # Channel Layer가 사용할 Redis 호스트 (docker-compose 내부의 redis 서비스를 가리킴)
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
     depends_on:
-      - redis # redis 서비스가 먼저 실행되도록 설정
-      - db    # db 서비스가 먼저 실행되도록 설정
+      redis:
+        condition: service_healthy
+    networks:
+      app_network:
+    healthcheck:
+      test: ["CMD", "python", "manage.py", "check", "--database", "default"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+#    command: tail -f /dev/null
 
-  # PostgreSQL 데이터베이스 서비스
-  db:
-    image: postgres:15-alpine
-    container_name: main_be_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      django:
+        condition: service_healthy
     ports:
-      - "5432:5432"
+      - "80:80"
+    volumes:
+      - static-:/app/staticfiles:ro
+      - ./resources/nginx/nginx-dev.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app_network
+    command: nginx -g 'daemon off;' # Nginx 실행만 담당
 
 volumes:
-  postgres_data:
+  static-:
+  redis-data:
+
+networks:
+  app_network:
+    driver: bridge
