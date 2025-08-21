@@ -33,7 +33,13 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]  # 배포 시 여기에 도메인 주소 추가.
+ALLOWED_HOSTS_str = os.getenv("ALLOWED_HOSTS")
+if ALLOWED_HOSTS_str:
+    # 환경 변수가 있으면, 쉼표로 구분된 문자열을 리스트로 변환 (서버 환경용)
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_str.split(',')]
+else:
+    # 환경 변수가 없으면, 기본값을 사용 (로컬 개발 환경용)
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
