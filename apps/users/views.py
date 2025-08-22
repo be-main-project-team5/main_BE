@@ -402,9 +402,9 @@ class FanMainboardView(APIView):
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    def post(self, request):
         try:
-            code = request.GET.get("code")
+            code = request.data.get("code")
             if not code:
                 return Response(
                     {"error": "Authorization code not provided."},
@@ -453,10 +453,10 @@ class KakaoCallbackView(APIView):
             user_info = user_info_response.json()
 
             kakao_id = user_info.get("id")
-            email = user_info.get("kakao_account", {}).get("email")
+            kakao_email = (
+                kakao_account := user_info.get("kakao_account")
+            ) and kakao_account.get("email")
             nickname = user_info.get("properties", {}).get("nickname")
-            if not email:
-                email = f"{kakao_id}@kakao.user"
 
             if not kakao_id:
                 return Response(
@@ -464,15 +464,21 @@ class KakaoCallbackView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            if not kakao_email:
+                return Response(
+                    {"error": "kakao email을 가져오지 못했습니다."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
             user, created = CustomUser.objects.get_or_create(
                 social_id=str(kakao_id),
                 social_provider="kakao",
-                defaults={"email": email, "nickname": nickname, "is_active": True},
+                defaults={"email": kakao_email, "nickname": nickname, "is_active": True},
             )
 
             if not created:
-                if email and user.email != email:
-                    user.email = email
+                if kakao_email and user.email != kakao_email:
+                    user.email = kakao_email
                 if nickname and user.nickname != nickname:
                     user.nickname = nickname
                 user.save()
@@ -503,9 +509,9 @@ class KakaoCallbackView(APIView):
 class GoogleCallbackView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request):
+    def post(self, request):
         try:
-            code = request.GET.get("code")
+            code = request.data.get("code")
             if not code:
                 return Response(
                     {"error": "Authorization code not provided."},
@@ -518,7 +524,7 @@ class GoogleCallbackView(APIView):
                     "code": code,
                     "client_id": settings.GOOGLE_CLIENT_ID,
                     "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                    "redirect_uri": "http://127.0.0.1:8000/api/v1/users/google/callback/",
+                    "redirect_uri": settings.GOOGLE_REDIRECT_URI,
                     "grant_type": "authorization_code",
                 },
             )
