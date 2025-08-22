@@ -19,12 +19,24 @@ from .serializers import (
 
 
 @extend_schema_view(
-    list=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 목록 조회"),
-    retrieve=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 상세 조회"),
-    create=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 생성"),
-    update=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 수정"),
-    partial_update=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 부분 수정"),
-    destroy=extend_schema(tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 삭제")
+    list=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 목록 조회"
+    ),
+    retrieve=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 상세 조회"
+    ),
+    create=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 생성"
+    ),
+    update=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 수정"
+    ),
+    partial_update=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 부분 수정"
+    ),
+    destroy=extend_schema(
+        tags=["아이돌 스케줄 (Idol Schedules)"], summary="아이돌 스케줄 삭제"
+    ),
 )
 class IdolScheduleViewSet(viewsets.ModelViewSet):
     queryset = IdolSchedule.objects.all()
@@ -51,12 +63,24 @@ class IdolScheduleViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 목록 조회"),
-    retrieve=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 상세 조회"),
-    create=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 생성"),
-    update=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 수정"),
-    partial_update=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 부분 수정"),
-    destroy=extend_schema(tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 삭제")
+    list=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 목록 조회"
+    ),
+    retrieve=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 상세 조회"
+    ),
+    create=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 생성"
+    ),
+    update=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 수정"
+    ),
+    partial_update=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 부분 수정"
+    ),
+    destroy=extend_schema(
+        tags=["그룹 스케줄 (Group Schedules)"], summary="그룹 스케줄 삭제"
+    ),
 )
 class GroupScheduleViewSet(viewsets.ModelViewSet):
     queryset = GroupSchedule.objects.all()
@@ -81,8 +105,12 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 목록 조회"),
-    retrieve=extend_schema(tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 상세 조회")
+    list=extend_schema(
+        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 목록 조회"
+    ),
+    retrieve=extend_schema(
+        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 상세 조회"
+    ),
 )
 class UserScheduleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = UserSchedule.objects.all()
@@ -108,12 +136,24 @@ class UserScheduleViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 목록 조회"),
-    retrieve=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 상세 조회"),
-    create=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 생성"),
-    update=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 수정"),
-    partial_update=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 부분 수정"),
-    destroy=extend_schema(tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 삭제")
+    list=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 목록 조회"
+    ),
+    retrieve=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 상세 조회"
+    ),
+    create=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 생성"
+    ),
+    update=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 수정"
+    ),
+    partial_update=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 부분 수정"
+    ),
+    destroy=extend_schema(
+        tags=["매니저 스케줄 관리 (Manager)"], summary="담당 아이돌 스케줄 삭제"
+    ),
 )
 class ManagerScheduleViewSet(viewsets.ModelViewSet):
     serializer_class = IdolScheduleSerializer
@@ -151,7 +191,7 @@ class ManagerScheduleViewSet(viewsets.ModelViewSet):
 @extend_schema(
     tags=["매니저 메인보드 (Manager Mainboard)"],
     summary="매니저 메인보드 오늘 스케줄 조회",
-    description="로그인한 매니저가 담당하는 아이돌들의 오늘자 스케줄을 조회합니다."
+    description="로그인한 매니저가 담당하는 아이돌들의 오늘자 스케줄을 조회합니다.",
 )
 class ManagerMainboardView(APIView):
     permission_classes = [IsManagerOrAdmin]
@@ -179,7 +219,7 @@ class ManagerMainboardView(APIView):
 @extend_schema(
     tags=["내 스케줄 (My Schedules)"],
     summary="내 모든 스케줄 목록 조회 (커스텀)",
-    description="로그인한 사용자가 즐겨찾기한 모든 스케줄의 목록을 조회합니다."
+    description="로그인한 사용자가 즐겨찾기한 모든 스케줄의 목록을 조회합니다.",
 )
 class MyScheduleListView(APIView):
     permission_classes = [IsAuthenticated]

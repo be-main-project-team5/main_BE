@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
 from apps.common.permissions import IsManagerOrAdminOrReadOnly
@@ -15,33 +15,33 @@ from .serializers import GroupSerializer
     list=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 목록 조회",
-        description="모든 아이돌 그룹의 목록을 조회합니다."
+        description="모든 아이돌 그룹의 목록을 조회합니다.",
     ),
     retrieve=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 상세 조회",
-        description="특정 아이돌 그룹의 상세 정보를 조회합니다."
+        description="특정 아이돌 그룹의 상세 정보를 조회합니다.",
     ),
     create=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 생성",
-        description="새로운 아이돌 그룹을 생성합니다. 매니저 또는 관리자만 가능합니다."
+        description="새로운 아이돌 그룹을 생성합니다. 매니저 또는 관리자만 가능합니다.",
     ),
     update=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 정보 수정",
-        description="기존 아이돌 그룹의 정보를 수정합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다."
+        description="기존 아이돌 그룹의 정보를 수정합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다.",
     ),
     partial_update=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 정보 부분 수정",
-        description="기존 아이돌 그룹의 정보 일부를 수정합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다."
+        description="기존 아이돌 그룹의 정보 일부를 수정합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다.",
     ),
     destroy=extend_schema(
         tags=["아이돌 그룹 (Groups)"],
         summary="아이돌 그룹 삭제",
-        description="아이돌 그룹을 삭제합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다."
-    )
+        description="아이돌 그룹을 삭제합니다. 해당 그룹의 매니저 또는 관리자만 가능합니다.",
+    ),
 )
 class GroupViewSet(viewsets.ModelViewSet):
     # 이 ViewSet이 다룰 모델 인스턴스들의 쿼리셋을 정의합니다.
