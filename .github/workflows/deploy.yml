@@ -68,5 +68,5 @@ jobs:
           script: |
             docker image prune -a --filter "until=6h"
             cd app
-            docker compose pull
-            docker compose up -d --force-recreate
+            docker-compose pull
+            docker-compose up -d --force-recreate
