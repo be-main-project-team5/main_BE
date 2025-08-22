@@ -63,7 +63,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DJANGO_IMAGE,NGINX_IMAGE  # 환경변수 전달
           script: |
             docker image prune -a --filter "until=6h"
             cd app
