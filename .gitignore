@@ -139,7 +139,6 @@ media
 ### uv ###
 .uv/
 .uv_cache/
-*.lock
 
 ### idea ###
 .idea/
