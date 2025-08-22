@@ -263,3 +263,14 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# CORS
+DOMAIN_NAME = "api.dingding.n-e.kr"
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173", f"https://{DOMAIN_NAME}"]
+CORS_ALLOW_CREDENTIALS = True  # 쿠키를 포함한 요청 허용
+CORS_ALLOWED_METHODS = ["GET", "POST", "DELETE", "PUT", "PATCH"]
+CORS_ALLOWED_HEADERS = ["Content-Type", "Authorization"]
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5173", f"https://{DOMAIN_NAME}"]
+CSRF_COOKIE_DOMAIN = f".{DOMAIN_NAME}"
