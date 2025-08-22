@@ -1,0 +1,64 @@
+# .github/workflows/checks.yml
+
+name: Code Quality Checks
+
+# 트리거 이벤트 부분
+# 코드가 푸시되거나 풀 리퀘스트가 생성될 때 CI가 실행됩니다.
+on:
+  push: # 변경사항 있을 때마다
+    branches: [ '**' ] # all branches 에 적용
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest # 가장 최신버젼의 ubuntu를 OS 환경으로 설정합니다.
+    services: # services 키워드를 사용하여 PostgreSQL 서비스를 설정
+      db:
+        image: postgres:14
+        ports:
+          - 5432:5432
+        env: # Github Secrets에서 가져와서 env로 등록, Postgres 데이터 베이스 연결 설정
+          POSTGRES_USER: ${{ secrets.PG_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.PG_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.PG_NAME }}
+        options: >- # 옵션으로 postgres의 연결 상태를 확인. 10초 단위로 5번 재시도. 5초간 기다림.
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps: # CI 환경에서 코드를 체크아웃합니다.
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python # CI 환경에서 사용할 파이썬 버젼을 지정합니다.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install uv # uv를 설치합니다.
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install Packages & Libraries # uv를 사용하여 의존성 패키지들을 설치합니다.
+        run: | 
+          uv sync --all-packages
+
+      - name: Run ruff (Import sorting) # ruff를 사용하여 import 구문의 정렬 순서와 포맷팅/스타일 검사를 체크합니다.
+        run: |
+          uv run ruff check . --select I,E,W --diff
+
+      - name: Wait for PostgreSQL  # db 연결을 테스트
+        run: |
+          until pg_isready -h localhost -p ${{ secrets.PG_PORT }} -U ${{ secrets.PG_USER }}; do 
+          sleep 1
+          done
+
+#      - name: Run Django Migration   # 정상적인 db연결을 확인했으니 마이그레이션 수행
+#        run: |
+#          uv run python manage.py makemigrations
+#          uv run python manage.py migrate
+
+    #        - name: Test python project # django test를 사용하여 모든 앱의 테스트코드를 실행합니다.
+    #          run: |
+    #            uv run python manage.py test
