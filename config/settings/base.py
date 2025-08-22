@@ -27,7 +27,7 @@ load_dotenv(dotenv_path=env_path)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") # SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -105,7 +105,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"  # ASGI 애플리케이션 설정
-
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -242,12 +241,12 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 # Kakao Social Login Settings
 KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
-KAKAO_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/kakao/callback/"
+KAKAO_REDIRECT_URI = os.getenv("KAKAO_REDIRECT_URI")
 
 # Google Social Login Settings
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/v1/users/google/callback/"
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 # Channel Layers
 CHANNEL_LAYERS = {
@@ -265,7 +264,7 @@ CHANNEL_LAYERS = {
 }
 
 # CORS
-DOMAIN_NAME = "api.dingding.n-e.kr"
+DOMAIN_NAME = "api.moyeoradingding.site"
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173", f"https://{DOMAIN_NAME}"]
 CORS_ALLOW_CREDENTIALS = True  # 쿠키를 포함한 요청 허용
