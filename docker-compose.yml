@@ -7,7 +7,7 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - SECRET_KEY=${SECRET_KEY}
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
       - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
     volumes:
       - static-:/app/staticfiles
