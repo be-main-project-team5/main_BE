@@ -63,6 +63,7 @@ THIRD_PARTY_APPS = [
     "apps.admins.apps.AdminsConfig",
     "django_cleanup.apps.CleanupConfig",
     "django_filters",
+    "corsheaders"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
@@ -77,6 +78,7 @@ CELERY_BEAT_SCHEDULE = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -266,10 +268,26 @@ CHANNEL_LAYERS = {
 # CORS
 DOMAIN_NAME = "api.moyeoradingding.site"
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173", f"https://{DOMAIN_NAME}"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    f"https://{DOMAIN_NAME}",
+    "http://localhost",
+    "http://localhost:443",
+    "https://main-fe-theta-dev.vercel.app",
+    "https://main-ra48950wd-105s-projects-9cf90619.vercel.app",
+    "https://www.moyeoradingding.site",
+]
 CORS_ALLOW_CREDENTIALS = True  # 쿠키를 포함한 요청 허용
 CORS_ALLOWED_METHODS = ["GET", "POST", "DELETE", "PUT", "PATCH"]
 CORS_ALLOWED_HEADERS = ["Content-Type", "Authorization"]
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173", f"https://{DOMAIN_NAME}"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    f"https://{DOMAIN_NAME}",
+    "http://localhost",
+    "http://localhost:443",
+    "https://main-fe-theta-dev.vercel.app",
+    "https://main-ra48950wd-105s-projects-9cf90619.vercel.app",
+    "https://www.moyeoradingding.site",
+]
 CSRF_COOKIE_DOMAIN = f".{DOMAIN_NAME}"
