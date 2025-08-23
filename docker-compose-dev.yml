@@ -67,6 +67,7 @@ services:
 
 volumes:
   static-:
+  media-:
   redis-data:
 
 networks:

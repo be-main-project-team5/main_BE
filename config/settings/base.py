@@ -291,3 +291,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.moyeoradingding.site",
 ]
 CSRF_COOKIE_DOMAIN = f".{DOMAIN_NAME}"
+
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
