@@ -7,10 +7,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
     volumes:
       - static-:/app/staticfiles
+      - media-:/app/media
     networks:
       - app_network
     expose:
@@ -54,6 +55,7 @@ services:
       - "443:443"
     volumes:
       - static-:/app/staticfiles:ro   # 정적 파일은 읽기 전용(ro)으로 마운트
+      - media-:/app/media:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot
     networks:
@@ -70,6 +72,7 @@ services:
 
 volumes:
   static-:
+  media-:
   redis-data:
 
 networks:
