@@ -20,10 +20,10 @@ from .models import CustomUser
 from .serializers import (
     FanMainboardSerializer,
     PasswordChangeSerializer,
+    PasswordVerifySerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     UserSignupSerializer,
-    PasswordVerifySerializer,
 )
 
 

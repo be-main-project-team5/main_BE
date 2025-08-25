@@ -8,25 +8,61 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('schedules', '0002_initial'),
+        ("schedules", "0002_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserSchedule',
+            name="UserSchedule",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('added_at', models.DateTimeField(auto_now_add=True)),
-                ('group_schedule', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_added_schedules', to='schedules.groupschedule')),
-                ('idol_schedule', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_added_schedules', to='schedules.idolschedule')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='my_schedules', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("added_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "group_schedule",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_added_schedules",
+                        to="schedules.groupschedule",
+                    ),
+                ),
+                (
+                    "idol_schedule",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_added_schedules",
+                        to="schedules.idolschedule",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="my_schedules",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': '사용자 스케줄',
-                'verbose_name_plural': '사용자 스케줄',
-                'db_table': 'user_schedules',
-                'unique_together': {('user', 'group_schedule'), ('user', 'idol_schedule')},
+                "verbose_name": "사용자 스케줄",
+                "verbose_name_plural": "사용자 스케줄",
+                "db_table": "user_schedules",
+                "unique_together": {
+                    ("user", "group_schedule"),
+                    ("user", "idol_schedule"),
+                },
             },
         ),
     ]

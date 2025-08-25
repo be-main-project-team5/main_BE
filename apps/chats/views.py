@@ -3,10 +3,10 @@ from django.shortcuts import render
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated  # 기존 임포트
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated # 기존 임포트
 
-from apps.common.permissions import IsIdolOrManager # 새로 추가
+from apps.common.permissions import IsIdolOrManager  # 새로 추가
 
 from .models import ChatParticipant, ChatRoom
 from .serializers import (
@@ -66,6 +66,14 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     def messages(self, request, pk=None):
         room = self.get_object()
         messages = room.messages.all().select_related("sender")
+
+        # ✅ 페이지네이션 적용
+        page = self.paginate_queryset(messages)
+        if page is not None:
+            serializer = ChatMessageSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # 페이지네이션이 설정되지 않은 경우 (fallback)
         serializer = ChatMessageSerializer(messages, many=True)
         return Response(serializer.data)
 
@@ -104,6 +112,13 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         room = self.get_object()
         participants = room.participants.all()
         users = [p.user for p in participants]
+
+        # ✅ 페이지네이션 적용
+        page = self.paginate_queryset(users)
+        if page is not None:
+            serializer = GroupMemberSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = GroupMemberSerializer(users, many=True)
         return Response(serializer.data)
 
