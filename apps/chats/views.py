@@ -47,8 +47,13 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         ).prefetch_related("participants__user", "last_message__sender")
 
     def perform_create(self, serializer):
-        room = serializer.save()
-        ChatParticipant.objects.create(room=room, user=self.request.user)
+        # 기존: 요청을 보낸 사용자만 참여자로 추가
+        # room = serializer.save()
+        # ChatParticipant.objects.create(room=room, user=self.request.user)
+
+        # 변경: 시리얼라이저의 create 메서드에서 모든 참여자 처리를 담당하므로,
+        # 여기서는 단순히 serializer.save()만 호출합니다.
+        serializer.save()
 
     @action(detail=True, methods=["get"])
     def messages(self, request, pk=None):
