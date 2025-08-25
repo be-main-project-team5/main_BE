@@ -4,6 +4,9 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated # 기존 임포트
+
+from apps.common.permissions import IsIdolOrManager # 새로 추가
 
 from .models import ChatParticipant, ChatRoom
 from .serializers import (
@@ -40,6 +43,10 @@ User = get_user_model()
 class ChatRoomViewSet(viewsets.ModelViewSet):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+
+    # 기존: permission_classes = [IsAuthenticated]
+    # 변경: 아이돌 또는 매니저만 생성 가능하도록 권한 추가
+    permission_classes = [IsAuthenticated, IsIdolOrManager]
 
     def get_queryset(self):
         return ChatRoom.objects.filter(
