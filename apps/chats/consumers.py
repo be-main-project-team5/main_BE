@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
 from .models import ChatMessage, ChatRoom
-from .serializers import ChatRoomSerializer # 새로 추가
+from .serializers import ChatRoomSerializer  # 새로 추가
 
 User = get_user_model()
 
@@ -26,7 +26,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         chat_room = await self.get_chat_room_with_details(self.room_id)
         serializer = ChatRoomSerializer(chat_room)
         await self.send(
-            text_data=json.dumps({"type": "chat_room_initial_state", "chat_room": serializer.data})
+            text_data=json.dumps(
+                {"type": "chat_room_initial_state", "chat_room": serializer.data}
+            )
         )
 
     def user_authenticated(self):
@@ -57,7 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                "type": "chat_room_update", # 프론트엔드에서 구분할 새로운 타입
+                "type": "chat_room_update",  # 프론트엔드에서 구분할 새로운 타입
                 "chat_room": serialized_data,
             },
         )
@@ -90,7 +92,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_chat_room_with_details(self, room_id):
         # ChatRoom 객체를 가져오면서 last_message와 participants를 프리페치
-        return ChatRoom.objects.select_related("last_message__sender").prefetch_related("participants__user").get(id=room_id)
+        return (
+            ChatRoom.objects.select_related("last_message__sender")
+            .prefetch_related("participants__user")
+            .get(id=room_id)
+        )
 
     # @database_sync_to_async
     # def get_user(self, user_id):

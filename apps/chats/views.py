@@ -3,10 +3,10 @@ from django.shortcuts import render
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated  # 기존 임포트
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated # 기존 임포트
 
-from apps.common.permissions import IsIdolOrManager # 새로 추가
+from apps.common.permissions import IsIdolOrManager  # 새로 추가
 
 from .models import ChatParticipant, ChatRoom
 from .serializers import (
