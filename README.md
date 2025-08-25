@@ -47,8 +47,6 @@
 ## 🧰 사용 스택(작성 예정)
 
 
-### :wrench: System Architecture
-
 <img src="https://user-images.githubusercontent.com/90237119/215304129-d8006105-cf1c-49c7-a819-4f819dfac523.png"/>
 
 ### FE
@@ -60,13 +58,25 @@
 
 ### BE
 <div align=center> 
-  <a href="https://github.com/msdio/stackticon"><img src="https://firebasestorage.googleapis.com/v0/b/stackticon-81399.appspot.com/o/images%2F1756112834859?alt=media&token=8c0caa18-e745-4cc5-a3a7-72b337a45291" alt="stackticon" /></a>
+
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge)
+![uv](https://img.shields.io/badge/uv-8F50FB?style=for-the-badge)
+![Ruff](https://img.shields.io/badge/Ruff-F4EA2A?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![NGINX](https://img.shields.io/badge/NGINX-009639?style=for-the-badge&logo=nginx&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 </div>
 
 
 --- 
 
-## :busts_in_silhouette: 팀 동료
+## 팀 동료
 
 ### FE
 
