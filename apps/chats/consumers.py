@@ -11,8 +11,8 @@ User = get_user_model()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = f"chat_{self.room_name}"
+        self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
+        self.room_group_name = f"chat_{self.room_id}"
 
         # if not self.scope["user"].is_authenticated:
         #     await self.close()
@@ -21,7 +21,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        history = await self.get_chat_history(self.room_name)
+        history = await self.get_chat_history(self.room_id)
         for message in history:
             await self.send(
                 text_data=json.dumps(
@@ -43,7 +43,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         sender_id = self.scope["user"].id
 
         message_obj = await self.save_message(
-            sender_id, self.room_name, message_content
+            sender_id, self.room_id, message_content
         )
 
         sender_nickname = await self.get_user_nickname(sender_id)
@@ -73,8 +73,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
-    def save_message(self, sender_id, room_name, message_content):
-        room = ChatRoom.objects.get(id=room_name)
+    def save_message(self, sender_id, room_id, message_content):
+        room = ChatRoom.objects.get(id=room_id)
         sender = User.objects.get(id=sender_id)
         return ChatMessage.objects.create(
             room=room, sender=sender, content=message_content
@@ -89,9 +89,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return User.objects.get(id=user_id).nickname
 
     @database_sync_to_async
-    def get_chat_history(self, room_name):
+    def get_chat_history(self, room_id):
         messages = (
-            ChatMessage.objects.filter(room__id=room_name)
+            ChatMessage.objects.filter(room__id=room_id)
             .order_by("sent_at")
             .values("content", "sender__nickname", "sent_at", "sender_id")
         )
