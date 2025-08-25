@@ -34,6 +34,7 @@ DEBUG = False
 
 ALLOWED_HOSTS_str = []
 
+APPEND_SLASH = False
 
 # Application definition
 

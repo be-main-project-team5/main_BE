@@ -23,6 +23,7 @@ from .serializers import (
     UserLoginSerializer,
     UserProfileSerializer,
     UserSignupSerializer,
+    PasswordVerifySerializer,
 )
 
 
@@ -293,6 +294,8 @@ class PasswordVerifyView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        serializer = PasswordVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         current_password = request.data.get("current_password")
         if not current_password:
             return Response(
