@@ -1,7 +1,7 @@
 from datetime import date
 
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from .serializers import (
     GroupScheduleSerializer,
     IdolScheduleSerializer,
     MyScheduleListSerializer,
+    UserScheduleCreateSerializer,
 )
 
 
@@ -106,33 +107,44 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 목록 조회"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄 목록 조회",
+        description="사용자가 북마크한 모든 스케줄의 목록을 조회합니다.",
     ),
     retrieve=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 상세 조회"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄 상세 조회",
+        description="북마크 ID(`UserSchedule`의 pk)를 이용하여 특정 북마크 항목을 상세 조회합니다.",
+    ),
+    create=extend_schema(
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄에 추가 (북마크)",
+        description="Request body에 `idol_schedule` 또는 `group_schedule`의 ID를 담아 POST 요청을 보내 특정 스케줄을 내 목록에 북마크합니다.",
+    ),
+    destroy=extend_schema(
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄에서 삭제 (북마크)",
+        description="북마크 ID(`UserSchedule`의 pk)를 URL 파라미터로 하여 DELETE 요청을 보내 특정 북마크를 내 목록에서 삭제합니다.",
     ),
 )
-class UserScheduleViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = UserSchedule.objects.all()
-    serializer_class = MyScheduleListSerializer
+class UserScheduleViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return UserSchedule.objects.filter(user=self.request.user)
+        return UserSchedule.objects.filter(user=self.request.user).select_related(
+            "idol_schedule", "group_schedule"
+        )
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        data = serializer.data
-        if instance.idol_schedule:
-            data["schedule_details"] = IdolScheduleSerializer(
-                instance.idol_schedule
-            ).data
-        elif instance.group_schedule:
-            data["schedule_details"] = GroupScheduleSerializer(
-                instance.group_schedule
-            ).data
-        return Response(data)
+    def get_serializer_class(self):
+        if self.action == "create":
+            return UserScheduleCreateSerializer
+        return MyScheduleListSerializer
 
 
 @extend_schema_view(
@@ -214,21 +226,3 @@ class ManagerMainboardView(APIView):
 
         serializer = IdolScheduleSerializer(schedules, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-@extend_schema(
-    tags=["내 스케줄 (My Schedules)"],
-    summary="내 모든 스케줄 목록 조회 (커스텀)",
-    description="로그인한 사용자가 즐겨찾기한 모든 스케줄의 목록을 조회합니다.",
-)
-class MyScheduleListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        user_schedules = UserSchedule.objects.filter(user=user).select_related(
-            "idol_schedule", "group_schedule"
-        )
-
-        serializer = MyScheduleListSerializer(user_schedules, many=True)
-        return Response(serializer.data)

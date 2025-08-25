@@ -27,71 +27,65 @@ class GroupScheduleSerializer(serializers.ModelSerializer):
 
 
 class UserScheduleCreateSerializer(serializers.ModelSerializer):
-    # 아이돌 스케줄 ID 또는 그룹 스케줄 ID 중 하나만 필수
-    idol_schedule_id = serializers.PrimaryKeyRelatedField(
-        queryset=IdolSchedule.objects.all(),
-        source="idol_schedule",
-        required=False,
-        allow_null=True,
+    idol_schedule = serializers.PrimaryKeyRelatedField(
+        queryset=IdolSchedule.objects.all(), required=False, allow_null=True
     )
-    group_schedule_id = serializers.PrimaryKeyRelatedField(
-        queryset=GroupSchedule.objects.all(),
-        source="group_schedule",
-        required=False,
-        allow_null=True,
+    group_schedule = serializers.PrimaryKeyRelatedField(
+        queryset=GroupSchedule.objects.all(), required=False, allow_null=True
     )
 
     class Meta:
         model = UserSchedule
-        fields = ["idol_schedule_id", "group_schedule_id"]
+        fields = ["id", "idol_schedule", "group_schedule"]
+        read_only_fields = ["id"]
 
     def validate(self, data):
-        idol_schedule = data.get("idol_schedule")
-        group_schedule = data.get("group_schedule")
-
-        if not idol_schedule and not group_schedule:
+        if not data.get("idol_schedule") and not data.get("group_schedule"):
             raise serializers.ValidationError(
-                "아이돌 스케줄 또는 그룹 스케줄 중 하나는 선택해야 합니다."
+                "A schedule (idol or group) must be provided."
             )
-        if idol_schedule and group_schedule:
+        if data.get("idol_schedule") and data.get("group_schedule"):
             raise serializers.ValidationError(
-                "아이돌 스케줄과 그룹 스케줄을 동시에 추가할 수 없습니다."
+                "Cannot provide both an idol and group schedule."
             )
 
-        # 이미 추가된 스케줄인지 확인
         user = self.context["request"].user
-        if (
-            idol_schedule
-            and UserSchedule.objects.filter(
-                user=user, idol_schedule=idol_schedule
-            ).exists()
-        ):
-            raise serializers.ValidationError(
-                "이미 내 스케줄에 추가된 아이돌 일정입니다.", code="duplicate_entry"
-            )
-        if (
-            group_schedule
-            and UserSchedule.objects.filter(
-                user=user, group_schedule=group_schedule
-            ).exists()
-        ):
-            raise serializers.ValidationError(
-                "이미 내 스케줄에 추가된 그룹 일정입니다.", code="duplicate_entry"
-            )
+        schedule_field = (
+            "idol_schedule" if data.get("idol_schedule") else "group_schedule"
+        )
+        schedule = data.get(schedule_field)
 
+        if UserSchedule.objects.filter(
+            user=user, **{schedule_field: schedule}
+        ).exists():
+            raise serializers.ValidationError(
+                {"detail": "This schedule is already in your list."}, code="unique"
+            )
         return data
 
     def create(self, validated_data):
-        user = self.context["request"].user
-        return UserSchedule.objects.create(user=user, **validated_data)
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
 
 
-class MyScheduleListSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)  # UserSchedule의 ID
-    schedule_id = serializers.IntegerField(read_only=True)  # 원본 스케줄의 ID
-    start_time = serializers.DateTimeField(read_only=True)
-    end_time = serializers.DateTimeField(read_only=True)
-    location = serializers.CharField(read_only=True)
-    description = serializers.CharField(read_only=True)
-    entity_type = serializers.CharField(read_only=True)  # 'idol' 또는 'group'
-    entity_name = serializers.CharField(read_only=True)  # 아이돌 이름 또는 그룹 이름
+class MyScheduleListSerializer(serializers.ModelSerializer):
+    schedule_type = serializers.SerializerMethodField()
+    schedule_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserSchedule
+        fields = ["id", "schedule_type", "schedule_details"]
+
+    def get_schedule_type(self, obj):
+        if obj.idol_schedule:
+            return "idol"
+        if obj.group_schedule:
+            return "group"
+        return None
+
+    def get_schedule_details(self, obj):
+        if obj.idol_schedule:
+            return IdolScheduleSerializer(obj.idol_schedule).data
+        if obj.group_schedule:
+            return GroupScheduleSerializer(obj.group_schedule).data
+        return None
