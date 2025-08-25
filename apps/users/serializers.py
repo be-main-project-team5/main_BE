@@ -157,9 +157,11 @@ class UserProfileSerializer(ImageUpdateSerializerMixin, serializers.ModelSeriali
         instance.save()
         return instance
 
+
 # 현재 비밀번호 확인
 class PasswordVerifySerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True, required=True)
+
 
 # 비밀번호 변경
 class PasswordChangeSerializer(serializers.Serializer):
