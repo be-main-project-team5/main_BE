@@ -42,8 +42,19 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
         # 직렬화할 필드들을 명시합니다.
-        fields = ["id", "room_name", "last_message", "participants", "created_at", "participant_ids"]
-        read_only_fields = ["last_message", "participants", "created_at"] # 읽기 전용 필드 명시
+        fields = [
+            "id",
+            "room_name",
+            "last_message",
+            "participants",
+            "created_at",
+            "participant_ids",
+        ]
+        read_only_fields = [
+            "last_message",
+            "participants",
+            "created_at",
+        ]  # 읽기 전용 필드 명시
 
     # get_participants 메서드: participants 필드의 값을 계산합니다.
     # obj: 현재 직렬화 중인 ChatRoom 인스턴스입니다.
@@ -59,7 +70,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # participant_ids를 validated_data에서 추출하고, ChatRoom 생성 시 사용되지 않도록 제거
         participant_ids = validated_data.pop("participant_ids", [])
-        
+
         # ChatRoom 인스턴스 생성
         chat_room = ChatRoom.objects.create(**validated_data)
 
@@ -70,23 +81,22 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
         # 중복 ID 제거 및 유효한 사용자 ID만 필터링
         unique_participant_ids = list(set(participant_ids))
-        
+
         # CustomUser 모델 가져오기
         User = get_user_model()
-        
+
         # 유효한 사용자 인스턴스 조회
         users_to_add = User.objects.filter(id__in=unique_participant_ids)
-        
+
         # ChatParticipant 인스턴스 생성
         chat_participants = []
         for user in users_to_add:
             chat_participants.append(ChatParticipant(room=chat_room, user=user))
-        
+
         # 벌크 생성 (성능 최적화)
         ChatParticipant.objects.bulk_create(chat_participants)
 
         return chat_room
-
 
 
 # ChatParticipantSerializer: 채팅방 참여자 정보를 직렬화합니다.

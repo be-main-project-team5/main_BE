@@ -1,11 +1,12 @@
-import jwt
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from urllib.parse import parse_qs
+
+import jwt
 from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
-from django.contrib.auth.models import AnonymousUser
 from channels.security.websocket import AllowedHostsOriginValidator
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 User = get_user_model()
 
@@ -45,6 +46,7 @@ class JWTAuthMiddleware(BaseMiddleware):
             scope["user"] = AnonymousUser()
 
         return await super().__call__(scope, receive, send)
+
 
 def JWTAuthMiddlewareStack(inner):
     return AllowedHostsOriginValidator(JWTAuthMiddleware(inner))
