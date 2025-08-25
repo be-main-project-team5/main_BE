@@ -18,3 +18,17 @@ class IsManagerOrAdminOrReadOnly(BasePermission):
             and request.user.is_authenticated
             and (request.user.is_staff or request.user.role == "MANAGER")
         )
+
+
+class IsIdolOrManager(BasePermission):
+    """
+    요청을 보낸 사용자가 아이돌(IDOL) 또는 매니저(MANAGER) 역할이거나 관리자인지 확인합니다.
+    """
+
+    def has_permission(self, request, view):
+        # 사용자가 인증되었는지 확인
+        if not request.user or not request.user.is_authenticated:
+            return False
+
+        # 사용자의 역할이 IDOL 또는 MANAGER이거나 관리자(is_staff)인지 확인
+        return request.user.role in ["IDOL", "MANAGER"] or request.user.is_staff
