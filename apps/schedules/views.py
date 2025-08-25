@@ -107,16 +107,24 @@ class GroupScheduleViewSet(viewsets.ModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 목록 조회"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄 목록 조회",
+        description="사용자가 북마크한 모든 스케줄의 목록을 조회합니다.",
     ),
     retrieve=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄 상세 조회"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄 상세 조회",
+        description="북마크 ID(`UserSchedule`의 pk)를 이용하여 특정 북마크 항목을 상세 조회합니다.",
     ),
     create=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄에 추가 (북마크)"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄에 추가 (북마크)",
+        description="Request body에 `idol_schedule` 또는 `group_schedule`의 ID를 담아 POST 요청을 보내 특정 스케줄을 내 목록에 북마크합니다.",
     ),
     destroy=extend_schema(
-        tags=["내 스케줄 (My Schedules)"], summary="내 스케줄에서 삭제 (북마크)"
+        tags=["내 스케줄 (My Schedules)"],
+        summary="내 스케줄에서 삭제 (북마크)",
+        description="북마크 ID(`UserSchedule`의 pk)를 URL 파라미터로 하여 DELETE 요청을 보내 특정 북마크를 내 목록에서 삭제합니다.",
     ),
 )
 class UserScheduleViewSet(
