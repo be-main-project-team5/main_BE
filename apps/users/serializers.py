@@ -5,10 +5,7 @@ from rest_framework import serializers
 
 from apps.common.mixins import ImageUpdateSerializerMixin
 from apps.schedules.models import GroupSchedule, IdolSchedule
-from apps.schedules.serializers import (
-    GroupScheduleSerializer,
-    IdolScheduleSerializer,
-)
+from apps.schedules.serializers import GroupScheduleSerializer, IdolScheduleSerializer
 
 from .models import CustomUser, Image
 

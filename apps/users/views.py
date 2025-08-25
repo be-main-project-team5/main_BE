@@ -473,7 +473,11 @@ class KakaoCallbackView(APIView):
             user, created = CustomUser.objects.get_or_create(
                 social_id=str(kakao_id),
                 social_provider="kakao",
-                defaults={"email": kakao_email, "nickname": nickname, "is_active": True},
+                defaults={
+                    "email": kakao_email,
+                    "nickname": nickname,
+                    "is_active": True,
+                },
             )
 
             if not created:

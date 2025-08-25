@@ -1,10 +1,93 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.common.permissions import IsManagerOrAdminOrReadOnly
+from apps.idols.models import Idol
+from apps.users.models import CustomUser
 
 from .models import Group
-from .serializers import GroupSerializer
+from .serializers import GroupMemberSerializer, GroupSerializer
+
+
+@extend_schema(
+    tags=["아이돌 그룹 (Groups)"],
+    summary="그룹 구성원 목록 조회",
+    description="요청을 보낸 사용자(매니저 또는 아이돌)가 속한 그룹의 모든 구성원(매니저 및 아이돌) 목록을 조회합니다.",
+)
+class GroupMembersView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GroupMemberSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        group = None
+
+        if user.role == "MANAGER":
+            # A user can manage multiple groups, so we get all of them
+            # and then find all users associated with these groups.
+            groups = user.managed_groups.all()
+            if not groups.exists():
+                return Response(
+                    {"detail": "관리하고 있는 그룹이 없습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Get all users from all managed groups
+            all_members_queryset = (
+                CustomUser.objects.none()
+            )  # Start with an empty queryset
+            for g in groups:
+                manager = g.manager
+                idols_in_group = Idol.objects.filter(group=g)
+                idol_users = CustomUser.objects.filter(idol__in=idols_in_group)
+
+                group_members = idol_users
+                if manager:
+                    group_members = group_members.union(
+                        CustomUser.objects.filter(id=manager.id)
+                    )
+                all_members_queryset = all_members_queryset.union(group_members)
+
+            serializer = self.serializer_class(
+                all_members_queryset.distinct(), many=True
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        elif user.role == "IDOL":
+            try:
+                idol_profile = Idol.objects.get(user=user)
+                group = idol_profile.group
+            except Idol.DoesNotExist:
+                return Response(
+                    {"detail": "아이돌 프로필이 존재하지 않습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        if not group:
+            return Response(
+                {"detail": "속한 그룹을 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Get the manager of the group
+        manager = group.manager
+
+        # Get all idols in the group
+        idols_in_group = Idol.objects.filter(group=group)
+        idol_users = CustomUser.objects.filter(idol__in=idols_in_group)
+
+        # Combine manager and idol users
+        members_queryset = idol_users
+        if manager:
+            members_queryset = members_queryset.union(
+                CustomUser.objects.filter(id=manager.id)
+            )
+
+        serializer = self.serializer_class(members_queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # Django REST Framework의 ViewSet을 사용하여 Group 모델에 대한 API 엔드포인트를 제공합니다.
