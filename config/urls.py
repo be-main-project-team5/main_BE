@@ -16,6 +16,7 @@ Including another URLconf
 """
 
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -33,24 +34,19 @@ urlpatterns = [
     # /api/v1/ 경로로 들어오는 요청은 apps.groups.urls에서 처리
     path("api/v1/groups/", include("apps.groups.urls")),
     path("api/v1/bookmarks/", include("apps.bookmarks.urls")),
-    path("api/v1/schedules/", include("apps.schedules.urls")),
-    path("api/v1/admins/", include("apps.admins.urls")),
     path("api/v1/chats/", include("apps.chats.urls")),
     path("api/v1/alarms/", include("apps.alarms.urls")),
-]
-
-if settings.DEBUG:
-    urlpatterns += (
-        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-        # Optional UI:
-        path(
-            "api/schema/swagger-ui/",
-            SpectacularSwaggerView.as_view(url_name="schema"),
-            name="swagger-ui",
-        ),
-        path(
-            "api/schema/redoc/",
-            SpectacularRedocView.as_view(url_name="schema"),
-            name="redoc",
-        ),
-    )
+    path("test/", include("apps.test_app.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    # Optional UI:
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

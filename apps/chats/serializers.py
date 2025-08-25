@@ -1,20 +1,14 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from apps.groups.serializers import (
+    GroupMemberSerializer,
+)  # GroupMemberSerializer 임포트
+
 from .models import ChatMessage, ChatParticipant, ChatRoom
 
 # Django의 현재 활성화된 사용자 모델을 가져옵니다 (CustomUser).
 User = get_user_model()
-
-
-# UserSerializer: 사용자 정보를 직렬화합니다.
-# 연동: ChatMessageSerializer, ChatRoomSerializer에서 중첩하여 사용됩니다.
-# 기능: 사용자의 ID, 닉네임, 프로필 이미지 등 필요한 정보만 노출합니다.
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        # 직렬화할 필드들을 명시합니다.
-        fields = ["id", "nickname", "profile_image"]
 
 
 # ChatMessageSerializer: 채팅 메시지 정보를 직렬화합니다.
@@ -22,11 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
 # 기능: 메시지의 내용, 발신자, 발송 시간 등을 API 응답으로 제공합니다.
 class ChatMessageSerializer(serializers.ModelSerializer):
     # sender: 메시지 발신자 정보를 UserSerializer를 통해 읽기 전용으로 중첩하여 보여줍니다.
-    sender = UserSerializer(read_only=True)
+    # UserSerializer는 제거되었으므로, 필요하다면 GroupMemberSerializer를 사용하거나 별도 정의 필요
+    sender = GroupMemberSerializer(read_only=True)  # GroupMemberSerializer 사용
 
     class Meta:
         model = ChatMessage
-        # 직렬화할 필드들을 명시합니다.
+        # 직렬화할 필드들을 명시합니다。
         fields = ["id", "sender", "content", "sent_at"]
 
 
@@ -36,7 +31,7 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 class ChatRoomSerializer(serializers.ModelSerializer):
     # last_message: ChatRoom 모델의 last_message 필드를 ChatMessageSerializer를 통해 읽기 전용으로 중첩하여 보여줍니다.
     last_message = ChatMessageSerializer(read_only=True)
-    # participants: 채팅방 참여자 목록을 SerializerMethodField를 통해 커스텀하여 보여줍니다.
+    # participants: 채팅방 참여자 목록을 SerializerMethodField를 통해 커스텀하여 보여줍니다。
     # ChatParticipant 객체 대신 User 객체 목록을 반환합니다.
     participants = serializers.SerializerMethodField()
 
@@ -52,9 +47,9 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         participants = obj.participants.all()
         # 각 ChatParticipant 객체에서 user 필드(CustomUser 인스턴스)만 추출하여 리스트를 만듭니다.
         users = [p.user for p in participants]
-        # 추출된 User 객체 리스트를 UserSerializer를 사용하여 직렬화하고, 그 데이터를 반환합니다.
+        # 추출된 User 객체 리스트를 GroupMemberSerializer를 사용하여 직렬화하고, 그 데이터를 반환합니다.
         # many=True: 여러 개의 객체를 직렬화할 때 사용합니다.
-        return UserSerializer(users, many=True).data
+        return GroupMemberSerializer(users, many=True).data
 
 
 # ChatParticipantSerializer: 채팅방 참여자 정보를 직렬화합니다.

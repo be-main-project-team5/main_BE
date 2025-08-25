@@ -1,9 +1,26 @@
 from rest_framework import serializers
 
 from apps.common.mixins import ImageUpdateSerializerMixin
-from apps.users.models import Image  # Image 모델 임포트
+from apps.users.models import CustomUser, Image  # CustomUser 임포트 추가
 
 from .models import Group
+
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    """
+    그룹 구성원(매니저, 아이돌)의 사용자 정보를 위한 Serializer
+    """
+
+    profile_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = ["id", "nickname", "role", "profile_image_url"]
+
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            return obj.profile_image.url
+        return None
 
 
 # Image 모델을 위한 Serializer (users 앱에서 가져옴)

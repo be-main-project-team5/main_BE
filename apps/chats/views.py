@@ -6,7 +6,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import ChatParticipant, ChatRoom
-from .serializers import ChatMessageSerializer, ChatRoomSerializer, UserSerializer
+from .serializers import (
+    ChatMessageSerializer,
+    ChatRoomSerializer,
+    GroupMemberSerializer,
+)
 
 User = get_user_model()
 
@@ -25,12 +29,12 @@ User = get_user_model()
         summary="채팅방 메시지 목록 조회",
         responses=ChatMessageSerializer(many=True),
     ),
-    join=extend_schema(tags=["채팅 (Chats)"], summary="채팅방 참여"),
-    leave=extend_schema(tags=["채팅 (Chats)"], summary="채팅방 나가기"),
+    join=extend_schema(tags=["채팅 (Chats)"], summary="채팅방 참여", request=None),
+    leave=extend_schema(tags=["채팅 (Chats)"], summary="채팅방 나가기", request=None),
     participants=extend_schema(
         tags=["채팅 (Chats)"],
         summary="채팅방 참여자 목록 조회",
-        responses=UserSerializer(many=True),
+        responses=GroupMemberSerializer(many=True),
     ),
 )
 class ChatRoomViewSet(viewsets.ModelViewSet):
@@ -55,7 +59,15 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def join(self, request, pk=None):
-        room = self.get_object()
+        # room = self.get_object() # 기존 코드: get_queryset 필터링 적용
+        try:
+            room = ChatRoom.objects.get(pk=pk)  # 수정된 코드: pk로 직접 조회
+        except ChatRoom.DoesNotExist:
+            return Response(
+                {"detail": "No ChatRoom matches the given query."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         participant, created = ChatParticipant.objects.get_or_create(
             room=room, user=request.user
         )
@@ -80,7 +92,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         room = self.get_object()
         participants = room.participants.all()
         users = [p.user for p in participants]
-        serializer = UserSerializer(users, many=True)
+        serializer = GroupMemberSerializer(users, many=True)
         return Response(serializer.data)
 
 
