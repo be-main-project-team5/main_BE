@@ -11,4 +11,4 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "Starting Gunicorn..."
-exec gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -w 3 -b 0.0.0.0:8000
+exec gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:8000
