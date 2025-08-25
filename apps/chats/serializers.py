@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from apps.groups.serializers import GroupMemberSerializer # GroupMemberSerializer 임포트
+from apps.groups.serializers import (
+    GroupMemberSerializer,
+)  # GroupMemberSerializer 임포트
 
 from .models import ChatMessage, ChatParticipant, ChatRoom
 
@@ -15,7 +17,7 @@ User = get_user_model()
 class ChatMessageSerializer(serializers.ModelSerializer):
     # sender: 메시지 발신자 정보를 UserSerializer를 통해 읽기 전용으로 중첩하여 보여줍니다.
     # UserSerializer는 제거되었으므로, 필요하다면 GroupMemberSerializer를 사용하거나 별도 정의 필요
-    sender = GroupMemberSerializer(read_only=True) # GroupMemberSerializer 사용
+    sender = GroupMemberSerializer(read_only=True)  # GroupMemberSerializer 사용
 
     class Meta:
         model = ChatMessage

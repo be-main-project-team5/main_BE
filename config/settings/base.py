@@ -27,7 +27,7 @@ load_dotenv(dotenv_path=env_path)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") # SECRET_KEY
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")  # SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -63,7 +63,7 @@ THIRD_PARTY_APPS = [
     "apps.admins.apps.AdminsConfig",
     "django_cleanup.apps.CleanupConfig",
     "django_filters",
-    "corsheaders"
+    "corsheaders",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS

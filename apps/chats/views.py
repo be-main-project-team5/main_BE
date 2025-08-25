@@ -6,7 +6,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import ChatParticipant, ChatRoom
-from .serializers import ChatMessageSerializer, ChatRoomSerializer, GroupMemberSerializer
+from .serializers import (
+    ChatMessageSerializer,
+    ChatRoomSerializer,
+    GroupMemberSerializer,
+)
 
 User = get_user_model()
 
@@ -57,9 +61,12 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     def join(self, request, pk=None):
         # room = self.get_object() # 기존 코드: get_queryset 필터링 적용
         try:
-            room = ChatRoom.objects.get(pk=pk) # 수정된 코드: pk로 직접 조회
+            room = ChatRoom.objects.get(pk=pk)  # 수정된 코드: pk로 직접 조회
         except ChatRoom.DoesNotExist:
-            return Response({"detail": "No ChatRoom matches the given query."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "No ChatRoom matches the given query."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         participant, created = ChatParticipant.objects.get_or_create(
             room=room, user=request.user

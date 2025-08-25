@@ -42,9 +42,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_content = text_data_json["message"]
         sender_id = self.scope["user"].id
 
-        message_obj = await self.save_message(
-            sender_id, self.room_id, message_content
-        )
+        message_obj = await self.save_message(sender_id, self.room_id, message_content)
 
         sender_nickname = await self.get_user_nickname(sender_id)
         sent_at = message_obj.sent_at.isoformat()
