@@ -3,6 +3,7 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 from .models import ChatMessage, ChatRoom
 
@@ -14,9 +15,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
         self.room_group_name = f"chat_{self.room_id}"
 
-        # if not self.scope["user"].is_authenticated:
-        #     await self.close()
-        #     return
+        if not self.user_authenticated():
+            await self.close(code=4001)
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
@@ -33,6 +33,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
+    def user_authenticated(self):
+        user = self.scope.get("user", None)
+        if isinstance(user, AnonymousUser) or not user:
+            return False
+        return True
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
