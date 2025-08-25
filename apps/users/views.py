@@ -284,7 +284,7 @@ class MyPageView(generics.RetrieveUpdateDestroyAPIView):
     tags=["사용자 (Users)"],
     summary="현재 비밀번호 확인",
     description="마이페이지 정보 수정을 위해 현재 사용자의 비밀번호가 일치하는지 확인합니다.",
-    request=None,
+    request=PasswordVerifySerializer,
     responses={
         200: {"description": "비밀번호 일치"},
         401: {"description": "비밀번호 불일치"},
