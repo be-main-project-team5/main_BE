@@ -218,3 +218,6 @@ class FanMainboardSerializer(serializers.Serializer):
         elif isinstance(obj, GroupSchedule):
             return GroupScheduleSerializer(obj).data
         return None
+
+class SocialLoginRequestSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True, help_text="카카오에서 발급된 인가 코드")

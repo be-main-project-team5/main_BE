@@ -24,6 +24,7 @@ from .serializers import (
     UserLoginSerializer,
     UserProfileSerializer,
     UserSignupSerializer,
+    SocialLoginRequestSerializer
 )
 
 
@@ -402,11 +403,12 @@ class FanMainboardView(APIView):
     tags=["소셜 로그인 (Social Login)"],
     summary="카카오 소셜 로그인 콜백",
     description="카카오 로그인 성공 후 인증 코드를 받아 서버의 토큰으로 교환합니다.",
+    request= SocialLoginRequestSerializer,
     responses={200: {"description": "토큰 발급 성공"}},
 )
 class KakaoCallbackView(APIView):
     permission_classes = [AllowAny]
-
+    serializer_class = SocialLoginRequestSerializer
     def post(self, request):
         try:
             code = request.data.get("code")
@@ -429,7 +431,6 @@ class KakaoCallbackView(APIView):
                 },
                 timeout=5,
             )
-
             token_json = token_response.json()
             if "error" in token_json:
                 return Response(
@@ -458,9 +459,7 @@ class KakaoCallbackView(APIView):
             user_info = user_info_response.json()
 
             kakao_id = user_info.get("id")
-            kakao_email = (
-                kakao_account := user_info.get("kakao_account")
-            ) and kakao_account.get("email")
+            kakao_email = (user_info.get("kakao_account") or {}).get("email")
             nickname = user_info.get("properties", {}).get("nickname")
 
             if not kakao_id:
@@ -468,7 +467,6 @@ class KakaoCallbackView(APIView):
                     {"error": "Failed to get user information from Kakao."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
             if not kakao_email:
                 return Response(
                     {"error": "kakao email을 가져오지 못했습니다."},
@@ -492,8 +490,20 @@ class KakaoCallbackView(APIView):
                     user.nickname = nickname
                 user.save()
 
+            # 4️⃣ 프론트에서 필요한 형태로 응답
             tokens = get_tokens_for_user(user)
-            return Response(tokens, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "nickname": user.nickname,
+                    },
+                    "access_token": tokens["access"],
+                    "refresh_token": tokens["refresh"],
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except requests.Timeout:
             return Response(
