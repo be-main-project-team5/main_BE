@@ -17,9 +17,10 @@ from .views import GroupMembersView, GroupViewSet
 router = routers.DefaultRouter()
 router.register(r"", GroupViewSet, basename="group")
 
-urlpatterns = router.urls
-
-# 그룹 구성원 조회를 위한 URL 추가
-urlpatterns += [
+# 'members/' 경로를 라우터 URL보다 먼저 정의합니다.
+urlpatterns = [
     path("members/", GroupMembersView.as_view(), name="group-members"),
 ]
+
+# 그 다음에 라우터의 URL을 추가합니다.
+urlpatterns += router.urls
