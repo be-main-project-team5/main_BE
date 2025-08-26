@@ -390,7 +390,7 @@ class FanMainboardView(APIView):
             ugs.group_schedule for ugs in user_group_schedules if ugs.group_schedule
         ]
 
-        all_schedules = list(set(all_schedules))
+        all_schedules = { (s.__class__.__name__, s.id): s for s in all_schedules }.values()
 
         serializer = FanMainboardSerializer(all_schedules, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
