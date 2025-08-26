@@ -23,7 +23,7 @@ class GroupMembersView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        
+
         member_ids = set()
 
         if user.role == "MANAGER":
@@ -37,8 +37,10 @@ class GroupMembersView(APIView):
             for g in groups:
                 if g.manager:
                     member_ids.add(g.manager.id)
-                
-                idol_user_ids = Idol.objects.filter(group=g).values_list('user_id', flat=True)
+
+                idol_user_ids = Idol.objects.filter(group=g).values_list(
+                    "user_id", flat=True
+                )
                 member_ids.update(idol_user_ids)
 
         elif user.role == "IDOL":
@@ -59,8 +61,10 @@ class GroupMembersView(APIView):
 
             if group.manager:
                 member_ids.add(group.manager.id)
-            
-            idol_user_ids = Idol.objects.filter(group=group).values_list('user_id', flat=True)
+
+            idol_user_ids = Idol.objects.filter(group=group).values_list(
+                "user_id", flat=True
+            )
             member_ids.update(idol_user_ids)
 
         # ID 목록이 비어있으면 빈 리스트 반환
