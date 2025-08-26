@@ -70,22 +70,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
         클라이언트에서 메시지 수신 시 실행됨
         """
         data = json.loads(text_data)
+        message_content = data.get("message")
+        sender = self.scope.get("user")
 
-        message_type = data.get("type")
+        # 메시지를 DB에 저장하고 직렬화된 데이터를 받음
+        message_data = await self.save_message(
+            sender_id=sender.id, room_id=self.room_id, message_content=message_content
+        )
 
-        # 일반 채팅 메시지 처리
-        if message_type == "chat.message":
-            message = data.get("message")
+        # 그룹 전체에 직렬화된 메시지 객체를 브로드캐스트
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat_message",  # chat_message 핸들러를 호출
+                "message": message_data,
+            },
+        )
 
-            # 그룹 전체에 브로드캐스트
-            await self.channel_layer.group_send(
-                self.room_group_name,
+    async def chat_message(self, event):
+        """
+        그룹으로부터 받은 chat_message 이벤트를 클라이언트에게 전송
+        """
+        message = event["message"]
+
+        # 클라이언트에게 웹소켓으로 최종 메시지 전송
+        await self.send(
+            text_data=json.dumps(
                 {
-                    "type": "chat_message",
+                    "type": "chat.message",
                     "message": message,
-                    "user": str(self.scope["user"]),
-                },
+                }
             )
+        )
 
     @database_sync_to_async
     def save_message(self, sender_id, room_id, message_content):
@@ -96,7 +112,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         room.last_message = message
         room.save()
-        return message
+        serializer = ChatMessageSerializer(message)
+        return serializer.data
 
     @database_sync_to_async
     def get_chat_room_with_details(self, room_id):
