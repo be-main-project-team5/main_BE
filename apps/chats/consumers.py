@@ -1,10 +1,10 @@
 import json
 
-from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from django.utils import timezone
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.utils import timezone
 
 from .models import ChatMessage, ChatRoom
 from .serializers import ChatMessageSerializer, ChatRoomSerializer  # 새로 추가
@@ -84,7 +84,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "message": message,
                     "user": str(self.scope["user"]),
-                }
+                },
             )
 
     @database_sync_to_async
