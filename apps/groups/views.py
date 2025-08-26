@@ -23,11 +23,10 @@ class GroupMembersView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        group = None
+        
+        member_ids = set()
 
         if user.role == "MANAGER":
-            # A user can manage multiple groups, so we get all of them
-            # and then find all users associated with these groups.
             groups = user.managed_groups.all()
             if not groups.exists():
                 return Response(
@@ -35,30 +34,16 @@ class GroupMembersView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Get all users from all managed groups
-            all_members_queryset = (
-                CustomUser.objects.none()
-            )  # Start with an empty queryset
             for g in groups:
-                manager = g.manager
-                idols_in_group = Idol.objects.filter(group=g)
-                idol_users = CustomUser.objects.filter(idol__in=idols_in_group)
-
-                group_members = idol_users
-                if manager:
-                    group_members = group_members.union(
-                        CustomUser.objects.filter(id=manager.id)
-                    )
-                all_members_queryset = all_members_queryset.union(group_members)
-
-            serializer = self.serializer_class(
-                all_members_queryset.distinct(), many=True
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                if g.manager:
+                    member_ids.add(g.manager.id)
+                
+                idol_user_ids = Idol.objects.filter(group=g).values_list('user_id', flat=True)
+                member_ids.update(idol_user_ids)
 
         elif user.role == "IDOL":
             try:
-                idol_profile = Idol.objects.get(user=user)
+                idol_profile = user.idol
                 group = idol_profile.group
             except Idol.DoesNotExist:
                 return Response(
@@ -66,27 +51,25 @@ class GroupMembersView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-        if not group:
-            return Response(
-                {"detail": "속한 그룹을 찾을 수 없습니다."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            if not group:
+                return Response(
+                    {"detail": "속한 그룹을 찾을 수 없습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
-        # Get the manager of the group
-        manager = group.manager
+            if group.manager:
+                member_ids.add(group.manager.id)
+            
+            idol_user_ids = Idol.objects.filter(group=group).values_list('user_id', flat=True)
+            member_ids.update(idol_user_ids)
 
-        # Get all idols in the group
-        idols_in_group = Idol.objects.filter(group=group)
-        idol_users = CustomUser.objects.filter(idol__in=idols_in_group)
+        # ID 목록이 비어있으면 빈 리스트 반환
+        if not member_ids:
+            return Response([], status=status.HTTP_200_OK)
 
-        # Combine manager and idol users
-        members_queryset = idol_users
-        if manager:
-            members_queryset = members_queryset.union(
-                CustomUser.objects.filter(id=manager.id)
-            )
-
-        serializer = self.serializer_class(members_queryset, many=True)
+        # 수집된 ID로 최종 사용자 목록 조회
+        all_members_queryset = CustomUser.objects.filter(id__in=member_ids)
+        serializer = self.serializer_class(all_members_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
