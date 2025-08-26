@@ -7,8 +7,6 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
-      - SECRET_KEY=${DJANGO_SECRET_KEY}
-      - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
     volumes:
       - static-:/app/staticfiles
       - media-:/app/media
@@ -20,7 +18,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python", "manage.py", "check", "--database", "default"]
+      test: ["CMD-SHELL", "cd /app && python manage.py check --database default"]
       interval: 30s
       timeout: 10s
       retries: 5
