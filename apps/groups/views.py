@@ -72,7 +72,7 @@ class GroupMembersView(APIView):
             return Response([], status=status.HTTP_200_OK)
 
         # 수집된 ID로 최종 사용자 목록 조회
-        all_members_queryset = CustomUser.objects.filter(id__in=member_ids)
+        all_members_queryset = CustomUser.objects.filter(id__in=list(member_ids))
         serializer = self.serializer_class(all_members_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
